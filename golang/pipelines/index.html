@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    
+    
+
+
+    <head>
+    <link href="https://gmpg.org/xfn/11" rel="profile">
+    <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta http-equiv="Cache-Control" content="public" />
+<!-- Enable responsiveness on mobile devices -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<meta name="generator" content="Hugo 0.55.6" />
+
+    
+    
+    
+
+<title>Pipelines • byBit</title>
+
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Pipelines"/>
+<meta name="twitter:description" content="All the code used here is on my github: pabloos. Keep an eye on it, for clarity I will not reference all the functions. Each section has his own branch.
+1. Original Sketch A pipeline is not unlike an assembly line: a queue of jobs that transform an input and sends it to the next stage. In Go an obvious implementation would be based on channels (originally based on an idea in the oficial blog), in which each function represents a separate stage connected with the next one using a channel."/>
+
+<meta property="og:title" content="Pipelines" />
+<meta property="og:description" content="All the code used here is on my github: pabloos. Keep an eye on it, for clarity I will not reference all the functions. Each section has his own branch.
+1. Original Sketch A pipeline is not unlike an assembly line: a queue of jobs that transform an input and sends it to the next stage. In Go an obvious implementation would be based on channels (originally based on an idea in the oficial blog), in which each function represents a separate stage connected with the next one using a channel." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://pabloos.github.gits/golang/pipelines/" />
+<meta property="article:published_time" content="2019-07-28T13:53:54&#43;02:00"/>
+<meta property="article:modified_time" content="2019-07-28T13:53:54&#43;02:00"/>
+
+
+    
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/zenburn.min.css">
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/scss/hyde-hyde.6a83d62c39a364f036df4db1ecd564645635d6c7fc182425cb501218fec485f5.css" integrity="sha256-aoPWLDmjZPA2302x7NVkZFY11sf8GCQly1ASGP7EhfU=">
+
+
+<link rel="stylesheet" href="/scss/print.2744dcbf8a0b2e74f8a50e4b34e5f441be7cf93cc7de27029121c6a09f9e77bc.css" integrity="sha256-J0Tcv4oLLnT4pQ5LNOX0Qb58&#43;TzH3icCkSHGoJ&#43;ed7w=" media="print">
+
+
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <!-- Icons -->
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/apple-touch-icon-144-precomposed.png">
+    <link rel="shortcut icon" href="/favicon.png">
+    
+</head>
+
+
+    <body class=" ">
+    
+<div class="sidebar">
+  <div class="container ">
+    <div class="sidebar-about">
+      <span class="site__title">
+        <a href="http://pabloos.github.gits/">byBit</a>
+      </span>
+      
+      
+      <p class="site__description">
+         golang, docker and much more 
+      </p>
+    </div>
+    <div class="collapsible-menu">
+      <input type="checkbox" id="menuToggle">
+      <label for="menuToggle">byBit</label>
+      <div class="menu-content">
+        <div>
+	<ul class="sidebar-nav">
+		 
+		 
+			 
+				<li>
+					<a href="/golang/">
+						<span>Golang</span>
+					</a>
+				</li>
+			 
+		
+	</ul>
+</div>
+
+        <section class="social">
+	
+	<a href="https://twitter.com/PabloCDaz" rel="me"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a>
+	
+	
+	
+	<a href="https://github.com/pabloos" rel="me"><i class="fab fa-github fa-lg" aria-hidden="true"></i></a>
+	
+	
+	
+	
+	
+	
+	
+	<a href="https://linkedin.com/in/pablocdiaz" rel="me"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a>
+	
+	
+	<a href="https://stackoverflow.com/users/5510296/pablo-cumpi%c3%a1n-d%c3%adaz" rel="me"><i class="fab fa-stack-overflow fa-lg" aria-hidden="true"></i></a>
+	
+	
+	
+	
+	
+	
+	
+	<a href="mailto:pablocumpia@gmail.com" rel="me"><i class="fas fa-at fa-lg" aria-hidden="true"></i></a>
+	
+</section>
+
+      </div>
+    </div>
+    
+
+
+  </div>
+</div>
+
+        <div class="content container">
+            
+    
+<article>
+  <header>
+    <h1>Pipelines</h1>
+    
+    
+<div class="post__meta">
+    
+    
+      <i class="fas fa-calendar-alt"></i> Jul 28, 2019
+    
+    
+    
+    
+    
+    <br/>
+    <i class="fas fa-clock"></i> 4 min read
+</div>
+
+
+  </header>
+  
+  
+  <div class="post">
+    
+
+<p><img src="pipelines.png" alt="pipelines" /></p>
+
+<p>All the code used here is on my github: <a href="https://github.com/pabloos/my-go-pipeline-pattern">pabloos</a>. Keep an eye on it, for clarity I will not reference all the functions. Each section has his own branch.</p>
+
+<h5 id="1-original-sketch">1. Original Sketch</h5>
+
+<p>A pipeline is not unlike an assembly line: a queue of jobs that transform an input and sends it to the next stage. In Go an obvious implementation would be based on channels (<a href="https://blog.golang.org/pipelines">originally based on an idea in the oficial blog</a>), in which each function represents a separate stage connected with the next one using a channel.</p>
+
+<pre><code class="language-go">type pipe &lt;-chan int
+</code></pre>
+
+<p>Thus, the stage&rsquo;s header should be:</p>
+
+<pre><code class="language-go">func stage(in pipe) pipe
+</code></pre>
+
+<p>Also, two more stages for the start and end queue are needed:</p>
+
+<pre><code class="language-go">func source(numbers ...int) pipe
+</code></pre>
+
+<pre><code class="language-go">func end(in pipe) []int
+</code></pre>
+
+<p>The source receives the inputm and the end stage returns an integer array. The point here is that all the async actions are wraped between the stages through channels, so we only need to keep care of the input and output types.</p>
+
+<p>Here is an example of a whole pipeline that performs a simple job on each stage:</p>
+
+<pre><code class="language-go">func source(numbers ...int) pipe {
+    out := make(chan int)
+
+    go func() {
+        for _, n := range numbers {
+            out &lt;- n
+        }
+        close(out)
+    }()
+
+    return out
+}
+
+func firstStage(in pipe) pipe {
+    out := make(chan int)
+
+    go func() {
+        for n := range in {
+            out &lt;- n * n
+        }
+        close(out)
+    }()
+
+    return out
+}
+
+func secondStage(in pipe) pipe {
+    ... //same logic as the way above
+}
+
+...
+
+func end(in &lt;-chan int) []int {
+    out := make([]int, 0)
+
+    var wg sync.WaitGroup
+
+    wg.Add(1)
+
+    go func() {
+        for n := range in {
+            out = append(out, n)
+        }
+        wg.Done()
+    }()
+
+    wg.Wait()
+
+    return out
+}
+</code></pre>
+
+<p>As you can see, we need a Barrier pattern as a WaitGroup in the end function to wait for all the responses sent by the previous stage.</p>
+
+<p>In order to run the pipeline you need to nest every stage into the next one:</p>
+
+<pre><code class="language-go">func main() {
+	for _, n := range end(thirdStage(secondStage(firstStage(source(2, 3, 2, 34))))) {
+		fmt.Println(n)
+	}
+}
+</code></pre>
+
+<h5 id="2-a-refactor-proposal">2. A refactor proposal</h5>
+
+<p>There are some obvious improvements to the code above:</p>
+
+<ul>
+<li>All the stages have the same header. So it could be an user-defined type; we will use this later:</li>
+</ul>
+
+<pre><code class="language-go">type stage func(pipe) pipe
+</code></pre>
+
+<ul>
+<li>All of them, also, have the same statements inside. The only diference is the mutation, so&hellip;</li>
+</ul>
+
+<pre><code class="language-go">type modifier func(int) int
+</code></pre>
+
+<ul>
+<li>The previous approach seems to mix the structure and the business logic. This is not desirable. We can decouple both by injecting the modifier in a function-composition manner:</li>
+</ul>
+
+<pre><code class="language-go">  func firstStage(in pipe, mod modifier) pipe {
+  	out := make(chan int)
+  	go send(out, in, mod)
+  	return out
+  }
+</code></pre>
+
+<ul>
+<li>Also the async function has only one responsability: send the result. So it&rsquo;s another candidate to be injected as we did above with the modifier.</li>
+</ul>
+
+<pre><code class="language-go">  func send(outChan chan int, inChan pipe, mod modifier) {
+  	for n := range inChan {
+  		outChan &lt;- mod(n)
+  	}
+  	close(outChan)
+  }
+</code></pre>
+
+<p>Decoupling all these things brings us the chance to test easily. That&rsquo;s for unit testing&hellip; but what about to see the pattern as a structure to check with integration tests?</p>
+
+<h5 id="3-pattern-as-an-object-autogenerate-the-stages">3. Pattern as an object. Autogenerate the stages</h5>
+
+<p>We could present all the elemets as a struct:</p>
+
+<pre><code class="language-go">type (
+	pipe     &lt;-chan int
+	source   func(...int) pipe
+	end      func(pipe) []int
+	stage    func(pipe) pipe
+	stages   []stage
+
+	Pipeline struct {
+		source
+		stages
+		end
+	}
+)
+</code></pre>
+
+<p>Also, stages can be autogenerated as we can inject the modifiers:</p>
+
+<pre><code class="language-go">func NewPipeline(source source, end end, modifiers ...modifier) *Pipeline {
+	return &amp;Pipeline{
+		source,
+		genStages(modifiers...),
+		end,
+	}
+}
+
+func genStages(modifiers ...modifier) stages {
+	stages := make(stages, 0)
+
+	for _, modifier := range modifiers {
+		stages = append(stages, getStage(modifier))
+	}
+
+	return stages
+}
+
+func getStage(mod modifier) stage {
+	return func(input pipe) pipe {
+		output := make(chan int)
+
+		go send(output, input, mod)
+
+		return output
+	}
+}
+</code></pre>
+
+<p>So, when we want to run the pipeline we only need to deploy the stages in the same order as we specified them and then consume the data stream at each stage:</p>
+
+<pre><code class="language-go">func (pip *Pipeline) Exec(input ...int) []int {
+	lastStageIndex := len(pip.stages) - 1
+
+	start := pip.source(input...)
+
+	result := pip.stages[0](start)
+
+	for i := 1; i &lt; lastStageIndex; i++ {
+		result = pip.stages[i](result)
+	}
+
+	if lastStageIndex == 0 { // if it's a single stage we don't want to remake the last stage (as it's also the first again)
+		return pip.end(result)
+	}
+
+	return pip.end(pip.stages[lastStageIndex](result))
+}
+</code></pre>
+
+<p>The call is cleaner than the previous ones, as you can see:</p>
+
+<pre><code class="language-go">	for _, number := range NewPipeline(start, final, add2, square, add2).Exec(1, 2, 3, 4, 5) {
+		fmt.Println(number)
+	}
+</code></pre>
+
+<h5 id="4-the-adventure-lasts-a-bit-longer">4. The adventure lasts a bit longer&hellip;</h5>
+
+<p>There&rsquo;s a ton of features to think about this refactor. A simple TODO list would be:</p>
+
+<ul>
+<li>fan in/out</li>
+<li>cancellation</li>
+<li>when to use buffered channels</li>
+<li>errors</li>
+<li>&hellip;</li>
+</ul>
+
+  </div>
+  
+
+<div class="navigation navigation-single">
+    
+    
+</div>
+
+
+  
+
+  
+    
+
+
+</article>
+
+
+        </div>
+        
+    
+
+<script defer src="https://use.fontawesome.com/releases/v5.5.0/js/all.js" integrity="sha384-GqVMZRt5Gn7tB9D9q7ONtcp4gtHIUEW/yG7h98J7IpE3kpi+srfFyyB/04OV6pG0" crossorigin="anonymous"></script>
+
+
+    
+    
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+        
+            
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/languages/go.min.js"></script>
+            
+        
+    
+    <script type="text/javascript">
+        
+        hljs.configure({languages: ["go"]});
+        
+        hljs.initHighlightingOnLoad();
+    </script>
+    
+
+
+
+
+    
+
+
+
+    </body>
+</html>
