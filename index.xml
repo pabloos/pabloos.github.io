@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>byBit</title>
-    <link>http://pabloos.github.gits/</link>
+    <link>http://pabloos.github.io/</link>
     <description>Recent content on byBit</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Sun, 28 Jul 2019 13:53:54 +0200</lastBuildDate>
     
-	<atom:link href="http://pabloos.github.gits/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="http://pabloos.github.io/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Pipelines</title>
-      <link>http://pabloos.github.gits/golang/pipelines/</link>
+      <link>http://pabloos.github.io/golang/pipelines/</link>
       <pubDate>Sun, 28 Jul 2019 13:53:54 +0200</pubDate>
       
-      <guid>http://pabloos.github.gits/golang/pipelines/</guid>
+      <guid>http://pabloos.github.io/golang/pipelines/</guid>
       <description>All the code used here is on my github: pabloos. Keep an eye on it, for clarity I will not reference all the functions. Each section has his own branch.
 1. Original Sketch A pipeline is not unlike an assembly line: a queue of jobs that transform an input and sends it to the next stage. In Go an obvious implementation would be based on channels (originally based on an idea in the oficial blog), in which each function represents a separate stage connected with the next one using a channel.</description>
     </item>
