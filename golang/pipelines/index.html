@@ -17,15 +17,15 @@
     
     
 
-<title>Pipelines • byBit</title>
+<title>Pipelines: a refactor proposal • byBit</title>
 
 
 <meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="Pipelines"/>
+<meta name="twitter:title" content="Pipelines: a refactor proposal"/>
 <meta name="twitter:description" content="All the code used here is on my github: pabloos. Keep an eye on it, for clarity I will not reference all the functions. Each section has his own branch.
 1. Original Sketch A pipeline is not unlike an assembly line: a queue of jobs that transform an input and sends it to the next stage. In Go an obvious implementation would be based on channels (originally based on an idea in the oficial blog), in which each function represents a separate stage connected with the next one using a channel."/>
 
-<meta property="og:title" content="Pipelines" />
+<meta property="og:title" content="Pipelines: a refactor proposal" />
 <meta property="og:description" content="All the code used here is on my github: pabloos. Keep an eye on it, for clarity I will not reference all the functions. Each section has his own branch.
 1. Original Sketch A pipeline is not unlike an assembly line: a queue of jobs that transform an input and sends it to the next stage. In Go an obvious implementation would be based on channels (originally based on an idea in the oficial blog), in which each function represents a separate stage connected with the next one using a channel." />
 <meta property="og:type" content="article" />
@@ -148,7 +148,7 @@
     
 <article>
   <header>
-    <h1>Pipelines</h1>
+    <h1>Pipelines: a refactor proposal</h1>
     
     
 <div class="post__meta">
@@ -383,7 +383,7 @@ func getStage(mod modifier) stage {
     }
 </code></pre>
 
-<h5 id="4-the-adventure-lasts-a-bit-longer">4. The adventure lasts a bit longer&hellip;</h5>
+<h5 id="4-the-flow-lasts-a-bit-longer">4. The flow lasts a bit longer&hellip;</h5>
 
 <p>There&rsquo;s a ton of features to think about this refactor. A simple TODO list would be:</p>
 
@@ -407,6 +407,35 @@ func getStage(mod modifier) stage {
   
 
   
+    
+        <div id="disqus_thread"></div>
+<script type="text/javascript">
+    
+
+    (function () {
+    if (location.hostname === "localhost" ||
+      location.hostname === "127.0.0.1" ||
+      location.hostname === "") {
+      return;
+    }
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    var disqus_shortname = 'yourdiscussshortname';
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || 
+      document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+
+<noscript>
+  Please enable JavaScript to view the
+  <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+</noscript>
+<a href="http://disqus.com/" class="dsq-brlink">comments powered by
+  <span class="logo-disqus">Disqus</span>
+</a>
+
     
 
 
