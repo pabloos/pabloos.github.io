@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="public" />
 <!-- Enable responsiveness on mobile devices -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
-<meta name="generator" content="Hugo 0.55.6" />
+<meta name="generator" content="Hugo 0.61.0" />
 
     
     
@@ -30,8 +30,8 @@
 1. Original Sketch A pipeline is not unlike an assembly line: a queue of jobs that transform an input and sends it to the next stage. In Go an obvious implementation would be based on channels (originally based on an idea in the oficial blog), in which each function represents a separate stage connected with the next one using a channel." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="http://pabloos.github.io/golang/pipelines/" />
-<meta property="article:published_time" content="2019-07-28T13:53:54&#43;02:00"/>
-<meta property="article:modified_time" content="2019-07-28T13:53:54&#43;02:00"/>
+<meta property="article:published_time" content="2019-07-28T13:53:54+02:00" />
+<meta property="article:modified_time" content="2019-07-28T13:53:54+02:00" />
 
 
     
@@ -65,7 +65,7 @@
 </head>
 
 
-    <body class=" ">
+    <body class="theme-base-0f ">
     
 <div class="sidebar">
   <div class="container ">
@@ -97,8 +97,48 @@
 		 
 			 
 				<li>
+					<a href="pablocumpia@gmail.com">
+						<span>Email</span>
+					</a>
+				</li>
+			 
+		 
+			 
+				<li>
+					<a href="https://www.github.com/pabloos">
+						<span>Github</span>
+					</a>
+				</li>
+			 
+		 
+			 
+				<li>
 					<a href="/golang/">
 						<span>Golang</span>
+					</a>
+				</li>
+			 
+		 
+			 
+				<li>
+					<a href="https://www.linkedin.com/in/pablocdiaz">
+						<span>Linkedin</span>
+					</a>
+				</li>
+			 
+		 
+			 
+				<li>
+					<a href="https://stackoverflow.com/users/5510296/pablo-cumpi%c3%a1n-d%c3%adaz">
+						<span>Stackoverflow</span>
+					</a>
+				</li>
+			 
+		 
+			 
+				<li>
+					<a href="https://www.twitter.com/PabloCDaz">
+						<span>Twitter</span>
 					</a>
 				</li>
 			 
@@ -108,11 +148,6 @@
 
         <section class="social">
 	
-	<a href="https://twitter.com/PabloCDaz" rel="me"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a>
-	
-	
-	
-	<a href="https://github.com/pabloos" rel="me"><i class="fab fa-github fa-lg" aria-hidden="true"></i></a>
 	
 	
 	
@@ -120,10 +155,6 @@
 	
 	
 	
-	<a href="https://linkedin.com/in/pablocdiaz" rel="me"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a>
-	
-	
-	<a href="https://stackoverflow.com/users/5510296/pablo-cumpi%c3%a1n-d%c3%adaz" rel="me"><i class="fab fa-stack-overflow fa-lg" aria-hidden="true"></i></a>
 	
 	
 	
@@ -131,7 +162,6 @@
 	
 	
 	
-	<a href="mailto:pablocumpia@gmail.com" rel="me"><i class="fas fa-at fa-lg" aria-hidden="true"></i></a>
 	
 </section>
 
@@ -169,224 +199,172 @@
   
   
   <div class="post">
-    
-
-<p><img src="https://raw.githubusercontent.com/pabloos/pabloos.github.io/master/golang/pipelines.png?token=ACBPJY7IRZM2GGQDLJKLXT25KR7JQ" alt="pipelines" /></p>
-
+    <p><img src="https://raw.githubusercontent.com/pabloos/pabloos.github.io/master/golang/pipelines.png?token=ACBPJY7IRZM2GGQDLJKLXT25KR7JQ" alt="pipelines"></p>
 <p>All the code used here is on my github: <a href="https://github.com/pabloos/my-go-pipeline-pattern">pabloos</a>. Keep an eye on it, for clarity I will not reference all the functions. Each section has his own branch.</p>
-
 <h5 id="1-original-sketch">1. Original Sketch</h5>
-
 <p>A pipeline is not unlike an assembly line: a queue of jobs that transform an input and sends it to the next stage. In Go an obvious implementation would be based on channels (<a href="https://blog.golang.org/pipelines">originally based on an idea in the oficial blog</a>), in which each function represents a separate stage connected with the next one using a channel.</p>
-
-<pre><code class="language-go">type pipe &lt;-chan int
-</code></pre>
-
-<p>Thus, the stage&rsquo;s header should be:</p>
-
-<pre><code class="language-go">func stage(in pipe) pipe
-</code></pre>
-
-<p>Also, two more stages for the start and end queue are needed:</p>
-
-<pre><code class="language-go">func source(numbers ...int) pipe
-</code></pre>
-
-<pre><code class="language-go">func end(in pipe) []int
-</code></pre>
-
-<p>The source receives the inputm and the end stage returns an integer array. The point here is that all the async actions are wraped between the stages through channels, so we only need to keep care of the input and output types.</p>
-
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">pipe</span> <span style="color:#f92672">&lt;-</span><span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">int</span>
+</code></pre></div><p>Thus, the stage's header should be:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">stage</span>(<span style="color:#a6e22e">in</span> <span style="color:#a6e22e">pipe</span>) <span style="color:#a6e22e">pipe</span>
+</code></pre></div><p>Also, two more stages for the start and end queue are needed:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">source</span>(<span style="color:#a6e22e">numbers</span> <span style="color:#f92672">...</span><span style="color:#66d9ef">int</span>) <span style="color:#a6e22e">pipe</span>
+</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">end</span>(<span style="color:#a6e22e">in</span> <span style="color:#a6e22e">pipe</span>) []<span style="color:#66d9ef">int</span>
+</code></pre></div><p>The source receives the inputm and the end stage returns an integer array. The point here is that all the async actions are wraped between the stages through channels, so we only need to keep care of the input and output types.</p>
 <p>Here is an example of a whole pipeline that performs a simple job on each stage:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">source</span>(<span style="color:#a6e22e">numbers</span> <span style="color:#f92672">...</span><span style="color:#66d9ef">int</span>) <span style="color:#a6e22e">pipe</span> {
+    <span style="color:#a6e22e">out</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">int</span>)
 
-<pre><code class="language-go">func source(numbers ...int) pipe {
-    out := make(chan int)
-
-    go func() {
-        for _, n := range numbers {
-            out &lt;- n
+    <span style="color:#66d9ef">go</span> <span style="color:#66d9ef">func</span>() {
+        <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">n</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">numbers</span> {
+            <span style="color:#a6e22e">out</span> <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">n</span>
         }
-        close(out)
+        close(<span style="color:#a6e22e">out</span>)
     }()
 
-    return out
+    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">out</span>
 }
 
-func firstStage(in pipe) pipe {
-    out := make(chan int)
+<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">firstStage</span>(<span style="color:#a6e22e">in</span> <span style="color:#a6e22e">pipe</span>) <span style="color:#a6e22e">pipe</span> {
+    <span style="color:#a6e22e">out</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">int</span>)
 
-    go func() {
-        for n := range in {
-            out &lt;- n * n
+    <span style="color:#66d9ef">go</span> <span style="color:#66d9ef">func</span>() {
+        <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">n</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">in</span> {
+            <span style="color:#a6e22e">out</span> <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">n</span> <span style="color:#f92672">*</span> <span style="color:#a6e22e">n</span>
         }
-        close(out)
+        close(<span style="color:#a6e22e">out</span>)
     }()
 
-    return out
+    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">out</span>
 }
 
-func secondStage(in pipe) pipe {
-    ... //same logic as the way above
-}
+<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">secondStage</span>(<span style="color:#a6e22e">in</span> <span style="color:#a6e22e">pipe</span>) <span style="color:#a6e22e">pipe</span> {
+    <span style="color:#f92672">...</span> <span style="color:#75715e">//same logic as the way above
+</span><span style="color:#75715e"></span>}
 
-...
+<span style="color:#f92672">...</span>
 
-func end(in &lt;-chan int) []int {
-    out := make([]int, 0)
+<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">end</span>(<span style="color:#a6e22e">in</span> <span style="color:#f92672">&lt;-</span><span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">int</span>) []<span style="color:#66d9ef">int</span> {
+    <span style="color:#a6e22e">out</span> <span style="color:#f92672">:=</span> make([]<span style="color:#66d9ef">int</span>, <span style="color:#ae81ff">0</span>)
 
-    var wg sync.WaitGroup
+    <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">wg</span> <span style="color:#a6e22e">sync</span>.<span style="color:#a6e22e">WaitGroup</span>
 
-    wg.Add(1)
+    <span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Add</span>(<span style="color:#ae81ff">1</span>)
 
-    go func() {
-        for n := range in {
-            out = append(out, n)
+    <span style="color:#66d9ef">go</span> <span style="color:#66d9ef">func</span>() {
+        <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">n</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">in</span> {
+            <span style="color:#a6e22e">out</span> = append(<span style="color:#a6e22e">out</span>, <span style="color:#a6e22e">n</span>)
         }
-        wg.Done()
+        <span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Done</span>()
     }()
 
-    wg.Wait()
+    <span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Wait</span>()
 
-    return out
+    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">out</span>
 }
-</code></pre>
-
-<p>As you can see, we need a Barrier pattern as a WaitGroup in the end function to wait for all the responses sent by the previous stage.</p>
-
+</code></pre></div><p>As you can see, we need a Barrier pattern as a WaitGroup in the end function to wait for all the responses sent by the previous stage.</p>
 <p>In order to run the pipeline you need to nest every stage into the next one:</p>
-
-<pre><code class="language-go">func main() {
-    for _, n := range end(thirdStage(secondStage(firstStage(source(2, 3, 2, 34))))) {
-        fmt.Println(n)
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+    <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">n</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">end</span>(<span style="color:#a6e22e">thirdStage</span>(<span style="color:#a6e22e">secondStage</span>(<span style="color:#a6e22e">firstStage</span>(<span style="color:#a6e22e">source</span>(<span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">34</span>))))) {
+        <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#a6e22e">n</span>)
     }
 }
-</code></pre>
-
-<h5 id="2-a-refactor-proposal">2. A refactor proposal</h5>
-
+</code></pre></div><h5 id="2-a-refactor-proposal">2. A refactor proposal</h5>
 <p>There are some obvious improvements to the code above:</p>
-
 <ul>
 <li>All the stages have the same header. So it could be an user-defined type; we will use this later:</li>
 </ul>
-
-<pre><code class="language-go">type stage func(pipe) pipe
-</code></pre>
-
-<ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">stage</span> <span style="color:#66d9ef">func</span>(<span style="color:#a6e22e">pipe</span>) <span style="color:#a6e22e">pipe</span>
+</code></pre></div><ul>
 <li>All of them, also, have the same statements inside. The only diference is the mutation, so&hellip;</li>
 </ul>
-
-<pre><code class="language-go">type modifier func(int) int
-</code></pre>
-
-<ul>
-<li>The previous approach seems to mix the structure and the business logic. This is not desirable. We can decouple both by injecting the modifier in a function-composition manner:</li>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">modifier</span> <span style="color:#66d9ef">func</span>(<span style="color:#66d9ef">int</span>) <span style="color:#66d9ef">int</span>
+</code></pre></div><ul>
+<li>
+<p>The previous approach seems to mix the structure and the business logic. This is not desirable. We can decouple both by injecting the modifier in a function-composition manner:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">firstStage</span>(<span style="color:#a6e22e">in</span> <span style="color:#a6e22e">pipe</span>, <span style="color:#a6e22e">mod</span> <span style="color:#a6e22e">modifier</span>) <span style="color:#a6e22e">pipe</span> {
+    <span style="color:#a6e22e">out</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">int</span>)
+    <span style="color:#66d9ef">go</span> <span style="color:#a6e22e">send</span>(<span style="color:#a6e22e">out</span>, <span style="color:#a6e22e">in</span>, <span style="color:#a6e22e">mod</span>)
+    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">out</span>
+}
+</code></pre></div></li>
+<li>
+<p>Also the async function has only one responsability: send the result. So it's another candidate to be injected as we did above with the modifier.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">send</span>(<span style="color:#a6e22e">outChan</span> <span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">int</span>, <span style="color:#a6e22e">inChan</span> <span style="color:#a6e22e">pipe</span>, <span style="color:#a6e22e">mod</span> <span style="color:#a6e22e">modifier</span>) {
+    <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">n</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">inChan</span> {
+        <span style="color:#a6e22e">outChan</span> <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">mod</span>(<span style="color:#a6e22e">n</span>)
+    }
+    close(<span style="color:#a6e22e">outChan</span>)
+}
+</code></pre></div></li>
 </ul>
-
-<pre><code class="language-go">  func firstStage(in pipe, mod modifier) pipe {
-      out := make(chan int)
-      go send(out, in, mod)
-      return out
-  }
-</code></pre>
-
-<ul>
-<li>Also the async function has only one responsability: send the result. So it&rsquo;s another candidate to be injected as we did above with the modifier.</li>
-</ul>
-
-<pre><code class="language-go">  func send(outChan chan int, inChan pipe, mod modifier) {
-      for n := range inChan {
-          outChan &lt;- mod(n)
-      }
-      close(outChan)
-  }
-</code></pre>
-
-<p>Decoupling all these things brings us the chance to test easily. That&rsquo;s for unit testing&hellip; but what about to see the pattern as a structure to check with integration tests?</p>
-
+<p>Decoupling all these things brings us the chance to test easily. That's for unit testing&hellip; but what about to see the pattern as a structure to check with integration tests?</p>
 <h5 id="3-pattern-as-an-object-autogenerate-the-stages">3. Pattern as an object. Autogenerate the stages</h5>
-
 <p>We could present all the elemets as a struct:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">type</span> (
+    <span style="color:#a6e22e">pipe</span>     <span style="color:#f92672">&lt;-</span><span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">int</span>
+    <span style="color:#a6e22e">source</span>   <span style="color:#66d9ef">func</span>(<span style="color:#f92672">...</span><span style="color:#66d9ef">int</span>) <span style="color:#a6e22e">pipe</span>
+    <span style="color:#a6e22e">end</span>      <span style="color:#66d9ef">func</span>(<span style="color:#a6e22e">pipe</span>) []<span style="color:#66d9ef">int</span>
+    <span style="color:#a6e22e">stage</span>    <span style="color:#66d9ef">func</span>(<span style="color:#a6e22e">pipe</span>) <span style="color:#a6e22e">pipe</span>
+    <span style="color:#a6e22e">stages</span>   []<span style="color:#a6e22e">stage</span>
 
-<pre><code class="language-go">type (
-    pipe     &lt;-chan int
-    source   func(...int) pipe
-    end      func(pipe) []int
-    stage    func(pipe) pipe
-    stages   []stage
-
-    Pipeline struct {
-        source
-        stages
-        end
+    <span style="color:#a6e22e">Pipeline</span> <span style="color:#66d9ef">struct</span> {
+        <span style="color:#a6e22e">source</span>
+        <span style="color:#a6e22e">stages</span>
+        <span style="color:#a6e22e">end</span>
     }
 )
-</code></pre>
-
-<p>Also, stages can be autogenerated as we can inject the modifiers:</p>
-
-<pre><code class="language-go">func NewPipeline(source source, end end, modifiers ...modifier) *Pipeline {
-    return &amp;Pipeline{
-        source,
-        genStages(modifiers...),
-        end,
+</code></pre></div><p>Also, stages can be autogenerated as we can inject the modifiers:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">NewPipeline</span>(<span style="color:#a6e22e">source</span> <span style="color:#a6e22e">source</span>, <span style="color:#a6e22e">end</span> <span style="color:#a6e22e">end</span>, <span style="color:#a6e22e">modifiers</span> <span style="color:#f92672">...</span><span style="color:#a6e22e">modifier</span>) <span style="color:#f92672">*</span><span style="color:#a6e22e">Pipeline</span> {
+    <span style="color:#66d9ef">return</span> <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">Pipeline</span>{
+        <span style="color:#a6e22e">source</span>,
+        <span style="color:#a6e22e">genStages</span>(<span style="color:#a6e22e">modifiers</span><span style="color:#f92672">...</span>),
+        <span style="color:#a6e22e">end</span>,
     }
 }
 
-func genStages(modifiers ...modifier) stages {
-    stages := make(stages, 0)
+<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">genStages</span>(<span style="color:#a6e22e">modifiers</span> <span style="color:#f92672">...</span><span style="color:#a6e22e">modifier</span>) <span style="color:#a6e22e">stages</span> {
+    <span style="color:#a6e22e">stages</span> <span style="color:#f92672">:=</span> make(<span style="color:#a6e22e">stages</span>, <span style="color:#ae81ff">0</span>)
 
-    for _, modifier := range modifiers {
-        stages = append(stages, getStage(modifier))
+    <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">modifier</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">modifiers</span> {
+        <span style="color:#a6e22e">stages</span> = append(<span style="color:#a6e22e">stages</span>, <span style="color:#a6e22e">getStage</span>(<span style="color:#a6e22e">modifier</span>))
     }
 
-    return stages
+    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">stages</span>
 }
 
-func getStage(mod modifier) stage {
-    return func(input pipe) pipe {
-        output := make(chan int)
+<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">getStage</span>(<span style="color:#a6e22e">mod</span> <span style="color:#a6e22e">modifier</span>) <span style="color:#a6e22e">stage</span> {
+    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">func</span>(<span style="color:#a6e22e">input</span> <span style="color:#a6e22e">pipe</span>) <span style="color:#a6e22e">pipe</span> {
+        <span style="color:#a6e22e">output</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">int</span>)
 
-        go send(output, input, mod)
+        <span style="color:#66d9ef">go</span> <span style="color:#a6e22e">send</span>(<span style="color:#a6e22e">output</span>, <span style="color:#a6e22e">input</span>, <span style="color:#a6e22e">mod</span>)
 
-        return output
+        <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">output</span>
     }
 }
-</code></pre>
+</code></pre></div><p>So, when we want to run the pipeline we only need to deploy the stages in the same order as we specified them and then consume the data stream at each stage:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">pip</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">Pipeline</span>) <span style="color:#a6e22e">Exec</span>(<span style="color:#a6e22e">input</span> <span style="color:#f92672">...</span><span style="color:#66d9ef">int</span>) []<span style="color:#66d9ef">int</span> {
+    <span style="color:#a6e22e">lastStageIndex</span> <span style="color:#f92672">:=</span> len(<span style="color:#a6e22e">pip</span>.<span style="color:#a6e22e">stages</span>) <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>
 
-<p>So, when we want to run the pipeline we only need to deploy the stages in the same order as we specified them and then consume the data stream at each stage:</p>
+    <span style="color:#a6e22e">start</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">pip</span>.<span style="color:#a6e22e">source</span>(<span style="color:#a6e22e">input</span><span style="color:#f92672">...</span>)
 
-<pre><code class="language-go">func (pip *Pipeline) Exec(input ...int) []int {
-    lastStageIndex := len(pip.stages) - 1
+    <span style="color:#a6e22e">result</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">pip</span>.<span style="color:#a6e22e">stages</span>[<span style="color:#ae81ff">0</span>](<span style="color:#a6e22e">start</span>)
 
-    start := pip.source(input...)
-
-    result := pip.stages[0](start)
-
-    for i := 1; i &lt; lastStageIndex; i++ {
-        result = pip.stages[i](result)
+    <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">1</span>; <span style="color:#a6e22e">i</span> &lt; <span style="color:#a6e22e">lastStageIndex</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span> {
+        <span style="color:#a6e22e">result</span> = <span style="color:#a6e22e">pip</span>.<span style="color:#a6e22e">stages</span>[<span style="color:#a6e22e">i</span>](<span style="color:#a6e22e">result</span>)
     }
 
-    if lastStageIndex == 0 { // if it's a single stage we don't want to remake the last stage (as it's also the first again)
-        return pip.end(result)
+    <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">lastStageIndex</span> <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span> { <span style="color:#75715e">// if it&#39;s a single stage we don&#39;t want to remake the last stage (as it&#39;s also the first again)
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">pip</span>.<span style="color:#a6e22e">end</span>(<span style="color:#a6e22e">result</span>)
     }
 
-    return pip.end(pip.stages[lastStageIndex](result))
+    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">pip</span>.<span style="color:#a6e22e">end</span>(<span style="color:#a6e22e">pip</span>.<span style="color:#a6e22e">stages</span>[<span style="color:#a6e22e">lastStageIndex</span>](<span style="color:#a6e22e">result</span>))
 }
-</code></pre>
-
-<p>The call is cleaner than the previous ones, as you can see:</p>
-
-<pre><code class="language-go">    for _, number := range NewPipeline(start, final, add2, square, add2).Exec(1, 2, 3, 4, 5) {
-        fmt.Println(number)
+</code></pre></div><p>The call is cleaner than the previous ones, as you can see:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go">    <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">number</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">NewPipeline</span>(<span style="color:#a6e22e">start</span>, <span style="color:#a6e22e">final</span>, <span style="color:#a6e22e">add2</span>, <span style="color:#a6e22e">square</span>, <span style="color:#a6e22e">add2</span>).<span style="color:#a6e22e">Exec</span>(<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">4</span>, <span style="color:#ae81ff">5</span>) {
+        <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#a6e22e">number</span>)
     }
-</code></pre>
-
-<h5 id="4-the-flow-lasts-a-bit-longer">4. The flow lasts a bit longer&hellip;</h5>
-
-<p>There&rsquo;s a ton of features to think about this refactor. A simple TODO list would be:</p>
-
+</code></pre></div><h5 id="4-the-flow-lasts-a-bit-longer">4. The flow lasts a bit longer&hellip;</h5>
+<p>There's a ton of features to think about this refactor. A simple TODO list would be:</p>
 <ul>
 <li>fan in/out</li>
 <li>cancellation</li>
