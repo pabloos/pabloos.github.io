@@ -3,7 +3,7 @@
 <head>
   <link href="https://gmpg.org/xfn/11" rel="profile">
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
-  <meta name="generator" content="Hugo 0.61.0" />
+  <meta name="generator" content="Hugo 0.68.3" />
 
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -41,11 +41,11 @@
     <nav>
       <ul class="sidebar-nav">
         <li><a href="https://pabloos.github.io/">Home</a> </li>
-        <li><a href="https://www.github.com/pabloos"> github </a></li><li><a href="/golang/"> golang </a></li><li><a href="https://www.linkedin.com/in/pablocdiaz"> linkedin </a></li><li><a href="https://stackoverflow.com/users/5510296/pablo-cumpi%c3%a1n-d%c3%adaz"> stackoverflow </a></li><li><a href="https://www.twitter.com/PabloCDaz"> twitter </a></li>
+        <li><a href="/concurrency/"> concurrency </a></li><li><a href="/testing/"> testing </a></li><li><a href="https://www.linkedin.com/in/pablocdiaz"> linkedin </a></li><li><a href="https://www.github.com/pabloos"> github </a></li><li><a href="mailto:pablocumpia@gmail.com"> email </a></li><li><a href="https://www.twitter.com/PabloCDaz"> twitter </a></li>
       </ul>
     </nav>
 
-    <p>&copy; 2019. All rights reserved. </p>
+    <p>&copy; 2020. All rights reserved. </p>
   </div>
 </aside>
 
@@ -53,14 +53,27 @@
     <div class="posts">
 <article class="post">
   <h1 class="post-title">
-    <a href="https://pabloos.github.io/golang/pipelines/">Pipelines: a refactor proposal</a>
+    <a href="https://pabloos.github.io/concurrency/pipelines/">Pipelines</a>
   </h1>
-  <time datetime="2019-07-28T13:53:54&#43;0200" class="post-date">Sun, Jul 28, 2019</time>
+  <time datetime="2020-04-09T13:20:57&#43;0200" class="post-date">Thu, Apr 9, 2020</time>
   All the code used here is on my github: pabloos. Keep an eye on it, for clarity I will not reference all the functions. Each section has his own branch.
 1. Original Sketch A pipeline is not unlike an assembly line: a queue of jobs that transform an input and sends it to the next stage. In Go an obvious implementation would be based on channels (originally based on an idea in the oficial blog), in which each function represents a separate stage connected with the next one using a channel.
   
   <div class="read-more-link">
-    <a href="/golang/pipelines/">Read More…</a>
+    <a href="/concurrency/pipelines/">Read More…</a>
+  </div>
+  
+</article><article class="post">
+  <h1 class="post-title">
+    <a href="https://pabloos.github.io/testing/e2e-with-jest-and-puppeteer.-how-i-do-it/">E2E with Jest And Puppeteer. How I do it.</a>
+  </h1>
+  <time datetime="2020-04-09T12:03:21&#43;0200" class="post-date">Thu, Apr 9, 2020</time>
+  As a backend developer E2E testing is a must for me. E2E testing does not check the features of the frontend only, it cares about the whole system. A good match for this purpose on Node it&rsquo;s the jest and puppeteer tandem for testing web apps.
+(Note: From now on I assume that you have some experience with the API of both technologies)
+About the dependencies You will find a bunch of posts about this topic on the internet.
+  
+  <div class="read-more-link">
+    <a href="/testing/e2e-with-jest-and-puppeteer.-how-i-do-it/">Read More…</a>
   </div>
   
 </article>

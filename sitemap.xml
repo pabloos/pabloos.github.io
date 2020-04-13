@@ -4,17 +4,27 @@
   
   <url>
     <loc>https://pabloos.github.io/</loc>
-    <lastmod>2019-07-28T13:53:54+02:00</lastmod>
+    <lastmod>2020-04-09T13:20:57+02:00</lastmod>
   </url>
   
   <url>
-    <loc>https://pabloos.github.io/golang/</loc>
-    <lastmod>2019-07-28T13:53:54+02:00</lastmod>
+    <loc>https://pabloos.github.io/concurrency/</loc>
+    <lastmod>2020-04-09T13:20:57+02:00</lastmod>
   </url>
   
   <url>
-    <loc>https://pabloos.github.io/golang/pipelines/</loc>
-    <lastmod>2019-07-28T13:53:54+02:00</lastmod>
+    <loc>https://pabloos.github.io/concurrency/pipelines/</loc>
+    <lastmod>2020-04-09T13:20:57+02:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://pabloos.github.io/testing/e2e-with-jest-and-puppeteer.-how-i-do-it/</loc>
+    <lastmod>2020-04-09T12:03:21+02:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://pabloos.github.io/testing/</loc>
+    <lastmod>2020-04-09T12:03:21+02:00</lastmod>
   </url>
   
   <url>
