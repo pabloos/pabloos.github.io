@@ -52,23 +52,23 @@
     <div class="post">
   <h1>E2E with Jest And Puppeteer. How I do it.</h1>
   <time datetime=2020-04-09T12:03:21&#43;0200 class="post-date">Thu, Apr 9, 2020</time>
-  <p>As a backend developer E2E testing is a must for me. E2E testing does not check the features of the frontend only, it cares about the whole system. A good match for this purpose on Node it&rsquo;s the jest and puppeteer tandem for testing web apps.</p>
+  <p>As a backend developer E2E testing is a must for me. E2E testing does not only check the features of the frontend, it cares about the whole system. A good match for this purpose on Node it&rsquo;s the jest and puppeteer tandem for testing web apps.</p>
 <p>(Note: From now on I assume that you have some experience with the API of both technologies)</p>
 <h3 id="about-the-dependencies">About the dependencies</h3>
-<p>You will find a bunch of posts about this topic on the internet. Some will tell you to install jest-puppeteer, but I don&rsquo;t like the way it works and what it offers to you. jest-puppeteer it&rsquo;s a preset that will &ldquo;insert&rdquo; on your code a browser and a page objects already defined to use on your tests. That means two things: global symbols and a break in your storytelling: where the browser instance comes from? For this reason I prefer to define manually my browser and page instances.</p>
+<p>You will find a bunch of posts about this topic on the internet. Some will tell you to install <em>jest-puppeteer</em>, but I don&rsquo;t like the way it works and what it offers to you. <em>jest-puppeteer</em> it&rsquo;s a preset that will &ldquo;insert&rdquo; on your code a browser and a page objects already defined to use on your tests. That means two things: global symbols and a break in your storytelling: where the browser instance comes from? For this reason I prefer to define manually my browser and page instances.</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#a6e22e">define</span>(<span style="color:#e6db74">&#39;E2E test suite&#39;</span>, () =&gt; {
-    <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">browser</span>, <span style="color:#a6e22e">page</span>
+  <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">browser</span>, <span style="color:#a6e22e">page</span>
 
   <span style="color:#a6e22e">beforeAll</span>(() =&gt; {
     <span style="color:#a6e22e">browser</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">await</span> <span style="color:#a6e22e">puppeteer</span>.<span style="color:#a6e22e">launch</span>(<span style="color:#a6e22e">config</span>)
     <span style="color:#a6e22e">page</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">await</span> <span style="color:#a6e22e">browser</span>.<span style="color:#a6e22e">newPage</span>()
   })
 })
-</code></pre></div><p>If you write this you&rsquo;re telling the story from the beginning: first, setup the environement. But there&rsquo;s another element that until now we&rsquo;re not showing: the server app. And there&rsquo;s when some people would tell you to use the built-in on the jest-puppeteer preset. It&rsquo;s usefull, as it run the server via a npm command for you&hellip; but you can do it by yourself (me neither want to exec a shell command from code, that feels tricky for me):</p>
+</code></pre></div><p>If you write this you&rsquo;re telling the story from the beginning: first, setup the environement. But there&rsquo;s another element that until now we&rsquo;re not showing: the server app. And there&rsquo;s when some people would tell you to use the launher built-in on the <em>jest-puppeteer</em> preset. It&rsquo;s usefull, as it run the server via a npm command for you&hellip; but you can do it by yourself (me neither want to exec a shell command from code, that feels tricky for me):</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">app</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;./myApp&#39;</span>)
 
 <span style="color:#a6e22e">define</span>(<span style="color:#e6db74">&#39;E2E test suite&#39;</span>, () =&gt; {
-    <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">server</span>, <span style="color:#a6e22e">browser</span>, <span style="color:#a6e22e">page</span>
+  <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">server</span>, <span style="color:#a6e22e">browser</span>, <span style="color:#a6e22e">page</span>
 
   <span style="color:#a6e22e">beforeAll</span>(() =&gt; {
     <span style="color:#a6e22e">server</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">await</span> <span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">run</span>()

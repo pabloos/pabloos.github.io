@@ -27,7 +27,7 @@
       <pubDate>Thu, 09 Apr 2020 12:03:21 +0200</pubDate>
       
       <guid>https://pabloos.github.io/testing/e2e-with-jest-and-puppeteer.-how-i-do-it/</guid>
-      <description>As a backend developer E2E testing is a must for me. E2E testing does not check the features of the frontend only, it cares about the whole system. A good match for this purpose on Node it&amp;rsquo;s the jest and puppeteer tandem for testing web apps.
+      <description>As a backend developer E2E testing is a must for me. E2E testing does not only check the features of the frontend, it cares about the whole system. A good match for this purpose on Node it&amp;rsquo;s the jest and puppeteer tandem for testing web apps.
 (Note: From now on I assume that you have some experience with the API of both technologies)
 About the dependencies You will find a bunch of posts about this topic on the internet.</description>
     </item>
