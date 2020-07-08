@@ -111,7 +111,7 @@
 But so many of them are missusing the basic interfaces, and they are a core design concept.
 Let&rsquo;s check it:</p>
 <h3 id="iowriter-and-ioreader">io.Writer and io.Reader</h3>
-<p>io.Writer should be most used interface as we&rsquo;re working with a language that has the distributed system in mind.</p>
+<p>io.Writer should be most used interface as we&rsquo;re working with a language that has distributed systems programming in mind.</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span>(<span style="color:#a6e22e">w</span> <span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">ResponseWriter</span>, <span style="color:#a6e22e">req</span> <span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">Request</span>) {
     <span style="color:#a6e22e">w</span>.<span style="color:#a6e22e">Write</span>([]byte(<span style="color:#e6db74">&#34;Hello from the web server!&#34;</span>))
     <span style="color:#75715e">// Don&#39;t do that. Do this instead:
