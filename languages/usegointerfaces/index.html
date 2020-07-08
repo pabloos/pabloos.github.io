@@ -142,7 +142,7 @@ Let&rsquo;s check it:</p>
 <span style="color:#75715e">// Everyone out there is doing this...
 </span><span style="color:#75715e"></span><span style="color:#a6e22e">conn</span>.<span style="color:#a6e22e">Write</span>([]byte(<span style="color:#e6db74">&#34;Hello from the tcp net!&#34;</span>))
 
-<span style="color:#75715e">// -&gt;
+<span style="color:#75715e">// better -&gt;
 </span><span style="color:#75715e"></span><span style="color:#a6e22e">io</span>.<span style="color:#a6e22e">WriteString</span>(<span style="color:#a6e22e">conn</span>, <span style="color:#e6db74">&#34;Hello from the tcp net!&#34;</span>)
 </code></pre></div><p>Oh, and here&rsquo;s a good one: you can use whatever of the previous objects as a log output.</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">logger</span> <span style="color:#a6e22e">log</span>.<span style="color:#a6e22e">Logger</span>
@@ -167,7 +167,7 @@ Let&rsquo;s check it:</p>
 <span style="color:#a6e22e">io</span>.<span style="color:#a6e22e">CopyBuffer</span>(<span style="color:#a6e22e">os</span>.<span style="color:#a6e22e">Stdout</span>, <span style="color:#a6e22e">r2</span>, <span style="color:#a6e22e">buf</span>);
 <span style="color:#75715e">// don&#39;t forget to ckeck the err and n bytes copied returned!
 </span></code></pre></div><h3 id="iopipe">io.Pipe</h3>
-<p>This is, in some way, the reverse function of io.Copy: puts everything in the writer avaliable to ReadFrom</p>
+<p>This is, in some way, the reverse function of io.Copy: puts everything in the writer avaliable to read from the reader:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#a6e22e">pr</span>, <span style="color:#a6e22e">pw</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">io</span>.<span style="color:#a6e22e">Pipe</span>()
 
 <span style="color:#66d9ef">go</span> <span style="color:#66d9ef">func</span>() { <span style="color:#75715e">// we need to write in a goroutine, because Pipe uses a blocking channel
