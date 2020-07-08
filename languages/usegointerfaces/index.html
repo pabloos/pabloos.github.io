@@ -109,7 +109,7 @@
 </table>
 <p>Go has become a very popular language, so there&rsquo;s day to day multiple posts and tutorials.
 But so many of them are missusing the basic interfaces, and them are a core design concept in Go.
-Let&rsquo;s check them:</p>
+Let&rsquo;s check it:</p>
 <h3 id="iowriter-and-ioreader">io.Writer and io.Reader</h3>
 <p>io.Writer should be most used interface as we&rsquo;re working with a language that has the distributed system in mind.</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span>(<span style="color:#a6e22e">w</span> <span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">ResponseWriter</span>, <span style="color:#a6e22e">req</span> <span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">Request</span>) {
