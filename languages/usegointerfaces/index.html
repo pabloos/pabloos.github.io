@@ -167,10 +167,10 @@ Let&rsquo;s check it:</p>
 <span style="color:#a6e22e">io</span>.<span style="color:#a6e22e">CopyBuffer</span>(<span style="color:#a6e22e">os</span>.<span style="color:#a6e22e">Stdout</span>, <span style="color:#a6e22e">r2</span>, <span style="color:#a6e22e">buf</span>);
 <span style="color:#75715e">// don&#39;t forget to ckeck the err and n bytes copied returned!
 </span></code></pre></div><h3 id="iopipe">io.Pipe</h3>
-<p>This is, in some way, the reverse function of io.Copy: puts everything in the writer avaliable to read from the reader:</p>
+<p>This is, in some way, the reverse function of io.Copy: puts everything in the pipe writer avaliable to read from the pipe reader:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#a6e22e">pr</span>, <span style="color:#a6e22e">pw</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">io</span>.<span style="color:#a6e22e">Pipe</span>()
 
-<span style="color:#66d9ef">go</span> <span style="color:#66d9ef">func</span>() { <span style="color:#75715e">// we need to write in a goroutine, because Pipe uses a blocking channel
+<span style="color:#66d9ef">go</span> <span style="color:#66d9ef">func</span>() { <span style="color:#75715e">// we need to write in a goroutine, because Pipe uses a blocking channel inside
 </span><span style="color:#75715e"></span>    <span style="color:#66d9ef">defer</span> <span style="color:#a6e22e">pw</span>.<span style="color:#a6e22e">Close</span>()
 
     <span style="color:#a6e22e">io</span>.<span style="color:#a6e22e">WriteString</span>(<span style="color:#a6e22e">pw</span>, <span style="color:#e6db74">&#34;Hello&#34;</span>)
@@ -192,8 +192,8 @@ Let&rsquo;s check it:</p>
 
 <span style="color:#a6e22e">sink</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">io</span>.<span style="color:#a6e22e">MultiWriter</span>(<span style="color:#a6e22e">file</span>, <span style="color:#a6e22e">os</span>.<span style="color:#a6e22e">Stdout</span>)
 <span style="color:#a6e22e">io</span>.<span style="color:#a6e22e">WriteString</span>(<span style="color:#a6e22e">sink</span>, <span style="color:#e6db74">&#34;A string written for a file and a tty&#34;</span>)
-</code></pre></div><h3 id="bifurcation-teereader">Bifurcation: TeeReader</h3>
-<p>As you can see in the previous example with the multiwriter, we are setting a bifucartion, so if you write on the result is the same as if you write directly on both writers you passed. The io library has a function that does this the same as the tee UNIX command do with readers:</p>
+</code></pre></div><h3 id="fork-teereader">Fork: TeeReader</h3>
+<p>As you can see in the previous example with the multiwriter, we are setting a fork, so if you write on the result is the same as if you write directly on both writers you passed. The io library has a function that does this the same as the tee UNIX command do:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#75715e">// read from request, create a tee reader and also puts the request on stdout
 </span><span style="color:#75715e"></span><span style="color:#a6e22e">tee</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">io</span>.<span style="color:#a6e22e">TeeReader</span>(<span style="color:#a6e22e">request</span>.<span style="color:#a6e22e">Body</span>, <span style="color:#a6e22e">os</span>.<span style="color:#a6e22e">Stdout</span>)
 <span style="color:#a6e22e">io</span>.<span style="color:#a6e22e">Copy</span>(<span style="color:#a6e22e">tee</span>, <span style="color:#a6e22e">file</span>)
