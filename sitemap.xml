@@ -3,12 +3,22 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>https://pabloos.github.io/concurrency/</loc>
-    <lastmod>2020-04-09T13:20:57+02:00</lastmod>
+    <loc>https://pabloos.github.io/</loc>
+    <lastmod>2020-06-28T12:43:10+02:00</lastmod>
   </url>
   
   <url>
-    <loc>https://pabloos.github.io/</loc>
+    <loc>https://pabloos.github.io/languages/</loc>
+    <lastmod>2020-06-28T12:43:10+02:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://pabloos.github.io/languages/usegointerfaces/</loc>
+    <lastmod>2020-06-28T12:43:10+02:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://pabloos.github.io/concurrency/</loc>
     <lastmod>2020-04-09T13:20:57+02:00</lastmod>
   </url>
   

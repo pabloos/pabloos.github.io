@@ -6,10 +6,20 @@
     <description>Recent content on DevOoops</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 09 Apr 2020 13:20:57 +0200</lastBuildDate>
+    <lastBuildDate>Sun, 28 Jun 2020 12:43:10 +0200</lastBuildDate>
     
 	<atom:link href="https://pabloos.github.io/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Use Go interfaces</title>
+      <link>https://pabloos.github.io/languages/usegointerfaces/</link>
+      <pubDate>Sun, 28 Jun 2020 12:43:10 +0200</pubDate>
+      
+      <guid>https://pabloos.github.io/languages/usegointerfaces/</guid>
+      <description>tl;dr:
+   from\to io.Writer io.Reader string []byte bytes.Buffer     io.Writer &amp;ndash; io.Pipe io.WriteString N/A N/A   io.Reader io.Copy &amp;ndash; strings.Builder N/A N/A   string bytes.NewBufferString strings.NewReader &amp;ndash; []byte(&amp;ldquo;io&amp;rdquo;)    []byte bytes.NewBuffer bytes.New{Reader/Buffer} string(byteSlice) &amp;ndash; bytes.NewBuffer   bytes.Buffer it&amp;rsquo;s it&amp;rsquo;s buf.String buf.bytes &amp;ndash;    Go has become a very popular language, so there&amp;rsquo;s day to day multiple posts and tutorials.</description>
+    </item>
     
     <item>
       <title>Pipelines</title>

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head>
+  <link href="https://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="generator" content="Hugo 0.70.0" />
+
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Use Go interfaces &middot; DevOoops</title>
+  <meta name="description" content="" />
+
+  
+  <link type="text/css" rel="stylesheet" href="https://pabloos.github.io/css/print.css" media="print">
+  <link type="text/css" rel="stylesheet" href="https://pabloos.github.io/css/poole.css">
+  <link type="text/css" rel="stylesheet" href="https://pabloos.github.io/css/syntax.css">
+  <link type="text/css" rel="stylesheet" href="https://pabloos.github.io/css/hyde.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Abril+Fatface|PT+Sans:400,400i,700">
+
+
+  
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/apple-touch-icon-144-precomposed.png">
+  <link rel="shortcut icon" href="/favicon.png">
+
+  
+  
+</head>
+
+  <body class="theme-base-0f ">
+  <aside class="sidebar">
+  <div class="container sidebar-sticky">
+    <div class="sidebar-about">
+      <a href="https://pabloos.github.io/"><h1>DevOoops</h1></a>
+      <p class="lead">
+       Pablo Cumpian, on software 
+      </p>
+    </div>
+
+    <nav>
+      <ul class="sidebar-nav">
+        <li><a href="https://pabloos.github.io/">Home</a> </li>
+        <li><a href="/concurrency/"> concurrency </a></li><li><a href="/testing/"> testing </a></li><li><a href="/languages/"> languages </a></li><li><a href="https://www.linkedin.com/in/pablocdiaz"> linkedin </a></li><li><a href="https://www.github.com/pabloos"> github </a></li><li><a href="mailto:pablocumpia@gmail.com"> email </a></li><li><a href="https://www.twitter.com/PabloCDaz"> twitter </a></li>
+      </ul>
+    </nav>
+
+    <p>&copy; 2020. All rights reserved. </p>
+  </div>
+</aside>
+
+    <main class="content container">
+    <div class="post">
+  <h1>Use Go interfaces</h1>
+  <time datetime=2020-06-28T12:43:10&#43;0200 class="post-date">Sun, Jun 28, 2020</time>
+  <p>tl;dr:</p>
+<table>
+<thead>
+<tr>
+<th align="center">from\to</th>
+<th align="center">io.Writer</th>
+<th align="center">io.Reader</th>
+<th align="center">string</th>
+<th align="center">[]byte</th>
+<th align="center">bytes.Buffer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center">io.Writer</td>
+<td align="center">&ndash;</td>
+<td align="center">io.Pipe</td>
+<td align="center">io.WriteString</td>
+<td align="center">N/A</td>
+<td align="center">N/A</td>
+</tr>
+<tr>
+<td align="center">io.Reader</td>
+<td align="center">io.Copy</td>
+<td align="center">&ndash;</td>
+<td align="center">strings.Builder</td>
+<td align="center">N/A</td>
+<td align="center">N/A</td>
+</tr>
+<tr>
+<td align="center">string</td>
+<td align="center">bytes.NewBufferString</td>
+<td align="center">strings.NewReader</td>
+<td align="center">&ndash;</td>
+<td align="center">[]byte(&ldquo;io&rdquo;)</td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center">[]byte</td>
+<td align="center">bytes.NewBuffer</td>
+<td align="center">bytes.New{Reader/Buffer}</td>
+<td align="center">string(byteSlice)</td>
+<td align="center">&ndash;</td>
+<td align="center">bytes.NewBuffer</td>
+</tr>
+<tr>
+<td align="center">bytes.Buffer</td>
+<td align="center">it&rsquo;s</td>
+<td align="center">it&rsquo;s</td>
+<td align="center">buf.String</td>
+<td align="center">buf.bytes</td>
+<td align="center">&ndash;</td>
+</tr>
+</tbody>
+</table>
+<p>Go has become a very popular language, so there&rsquo;s day to day multiple posts and tutorials.
+But so many of them are missusing the basic interfaces, and interfaces are a core design concept in Go.
+Let&rsquo;s check them:</p>
+<h3 id="iowriter-and-ioreader">io.Writer and io.Reader</h3>
+<p>io.Writer should be most used interface as we&rsquo;re working with a language that has the distributed system in mind.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span>(<span style="color:#a6e22e">w</span> <span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">ResponseWriter</span>, <span style="color:#a6e22e">req</span> <span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">Request</span>) {
+    <span style="color:#a6e22e">w</span>.<span style="color:#a6e22e">Write</span>([]byte(<span style="color:#e6db74">&#34;Hello from the web server!&#34;</span>))
+    <span style="color:#75715e">// Don&#39;t do that. Do this instead:
+</span><span style="color:#75715e"></span>
+    <span style="color:#a6e22e">io</span>.<span style="color:#a6e22e">WriteString</span>(<span style="color:#a6e22e">w</span>, <span style="color:#e6db74">&#34;Hello from the web server!&#34;</span>)
+    <span style="color:#75715e">// don&#39;t forget to check len and err returned
+</span><span style="color:#75715e"></span>}
+</code></pre></div><ul>
+<li>This goes into the polemic ones:</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#75715e">// Nop (unless you place that on the main).
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Print</span>(<span style="color:#e6db74">&#34;hello tty!&#34;</span>)
+<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#a6e22e">err</span>)
+
+<span style="color:#75715e">// Please:
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">io</span>.<span style="color:#a6e22e">WriteString</span>(<span style="color:#a6e22e">os</span>.<span style="color:#a6e22e">Stdout</span>, <span style="color:#e6db74">&#34;hello tty!&#34;</span>)
+<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Fprintln</span>(<span style="color:#a6e22e">os</span>.<span style="color:#a6e22e">Stderr</span>, <span style="color:#a6e22e">err</span>.<span style="color:#a6e22e">Error</span>())
+
+<span style="color:#75715e">// Which allows you to use your terminal session output as a parameter (and that&#39;s a more pleausre way to test).
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">f</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">os</span>.<span style="color:#a6e22e">Create</span>(<span style="color:#e6db74">&#34;myFile&#34;</span>)
+
+<span style="color:#a6e22e">io</span>.<span style="color:#a6e22e">WriteString</span>(<span style="color:#a6e22e">f</span>, <span style="color:#e6db74">&#34;hello tty!&#34;</span>)
+</code></pre></div><ul>
+<li>This maybe it&rsquo;s less obvious, but in the same mood:</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#a6e22e">conn</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">net</span>.<span style="color:#a6e22e">Listen</span>(<span style="color:#e6db74">&#34;tcp&#34;</span>, <span style="color:#e6db74">&#34;:8080&#34;</span>)
+
+<span style="color:#75715e">// Everyone out there is doing this...
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">conn</span>.<span style="color:#a6e22e">Write</span>([]byte(<span style="color:#e6db74">&#34;Hello from the tcp net!&#34;</span>))
+
+<span style="color:#75715e">// -&gt;
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">io</span>.<span style="color:#a6e22e">WriteString</span>(<span style="color:#a6e22e">conn</span>, <span style="color:#e6db74">&#34;Hello from the tcp net!&#34;</span>)
+</code></pre></div><p>Oh, and here&rsquo;s a good one: you can use whatever of the previous objects as a log output.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">logger</span> <span style="color:#a6e22e">log</span>.<span style="color:#a6e22e">Logger</span>
+
+<span style="color:#a6e22e">logger</span>.<span style="color:#a6e22e">setOutput</span>(<span style="color:#a6e22e">w</span>) <span style="color:#75715e">// a file, a net connection, or a http.ResponseWriter... or the default os.Stdout
+</span></code></pre></div><p>The io.Reader could help us decoupling the user input in a scanner (it could be a file, the os.Stdin, or a stream):</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#a6e22e">scanner</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">bufio</span>.<span style="color:#a6e22e">NewScanner</span>(<span style="color:#a6e22e">os</span>.<span style="color:#a6e22e">Stdin</span>)
+<span style="color:#a6e22e">scanner</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">bufio</span>.<span style="color:#a6e22e">NewScanner</span>(<span style="color:#a6e22e">configFile</span>)
+<span style="color:#75715e">// ...
+</span></code></pre></div><h3 id="iocopy-and-iocopybuffer">io.Copy and io.CopyBuffer</h3>
+<p>io.Copy writes the contents of a Reader to a Writer, so you could use something like:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#a6e22e">io</span>.<span style="color:#a6e22e">Copy</span>(<span style="color:#a6e22e">os</span>.<span style="color:#a6e22e">Stdout</span>, <span style="color:#a6e22e">request</span>.<span style="color:#a6e22e">Body</span>) <span style="color:#75715e">// prints the request body
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">io</span>.<span style="color:#a6e22e">Copy</span>(<span style="color:#a6e22e">response</span>, <span style="color:#a6e22e">request</span>.<span style="color:#a6e22e">Body</span>) <span style="color:#75715e">// send back the request
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">io</span>.<span style="color:#a6e22e">Copy</span>(<span style="color:#a6e22e">myFile</span>, <span style="color:#a6e22e">request</span>.<span style="color:#a6e22e">Body</span>) <span style="color:#75715e">// send a file content or
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">io</span>.<span style="color:#a6e22e">Copy</span>(<span style="color:#a6e22e">response</span>, <span style="color:#a6e22e">myFile</span>) <span style="color:#75715e">// send back the file content
+</span></code></pre></div><p>io.CopyBuffer does the same, but we use our own buffer instead of let the copy function allocate another one. Because of this we could reuse it:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#a6e22e">r1</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">strings</span>.<span style="color:#a6e22e">NewReader</span>(<span style="color:#e6db74">&#34;You said goodbye...\n&#34;</span>)
+<span style="color:#a6e22e">r2</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">strings</span>.<span style="color:#a6e22e">NewReader</span>(<span style="color:#e6db74">&#34;... and I said Hello\n&#34;</span>)
+<span style="color:#a6e22e">buf</span> <span style="color:#f92672">:=</span> make([]<span style="color:#66d9ef">byte</span>, <span style="color:#ae81ff">12</span>)
+
+<span style="color:#a6e22e">io</span>.<span style="color:#a6e22e">CopyBuffer</span>(<span style="color:#a6e22e">os</span>.<span style="color:#a6e22e">Stdout</span>, <span style="color:#a6e22e">r1</span>, <span style="color:#a6e22e">buf</span>);
+<span style="color:#a6e22e">io</span>.<span style="color:#a6e22e">CopyBuffer</span>(<span style="color:#a6e22e">os</span>.<span style="color:#a6e22e">Stdout</span>, <span style="color:#a6e22e">r2</span>, <span style="color:#a6e22e">buf</span>);
+<span style="color:#75715e">// don&#39;t forget to ckeck the err and n bytes copied returned!
+</span></code></pre></div><h3 id="iopipe">io.Pipe</h3>
+<p>This is, in some way, the reverse function of io.Copy: puts everything in the writer avaliable to ReadFrom</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#a6e22e">pr</span>, <span style="color:#a6e22e">pw</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">io</span>.<span style="color:#a6e22e">Pipe</span>()
+
+<span style="color:#66d9ef">go</span> <span style="color:#66d9ef">func</span>() { <span style="color:#75715e">// we need to write in a goroutine, because Pipe uses a blocking channel
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">defer</span> <span style="color:#a6e22e">pw</span>.<span style="color:#a6e22e">Close</span>()
+
+    <span style="color:#a6e22e">io</span>.<span style="color:#a6e22e">WriteString</span>(<span style="color:#a6e22e">pw</span>, <span style="color:#e6db74">&#34;Hello&#34;</span>)
+}()
+
+<span style="color:#a6e22e">io</span>.<span style="color:#a6e22e">Copy</span>(<span style="color:#a6e22e">os</span>.<span style="color:#a6e22e">Stdout</span>, <span style="color:#a6e22e">pr</span>)
+</code></pre></div><h3 id="iocloser-a-special-case">io.Closer (a special case)</h3>
+<p>When working with some readers/writers you should close the resource at the end in order to avoid leaks.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span>(<span style="color:#a6e22e">rc</span> <span style="color:#a6e22e">io</span>.<span style="color:#a6e22e">ReaderCloser</span>) { <span style="color:#75715e">// ask for a reader that use a close method: net.Conn, request.Body, a file...
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">defer</span> <span style="color:#a6e22e">rc</span>.<span style="color:#a6e22e">Close</span>()
+}
+</code></pre></div><h3 id="multireader-and-multiwriter">MultiReader and MultiWriter</h3>
+<ul>
+<li>MultiReader concatenate various readers into one</li>
+<li>MultiWriter returns a writer which will perform a write on every writer you passed</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#a6e22e">newReader</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">io</span>.<span style="color:#a6e22e">MultiReader</span>(<span style="color:#a6e22e">file</span>, <span style="color:#a6e22e">request</span>)
+<span style="color:#a6e22e">io</span>.<span style="color:#a6e22e">Copy</span>(<span style="color:#a6e22e">newReader</span>, <span style="color:#a6e22e">os</span>.<span style="color:#a6e22e">Stdout</span>)
+
+<span style="color:#a6e22e">sink</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">io</span>.<span style="color:#a6e22e">MultiWriter</span>(<span style="color:#a6e22e">file</span>, <span style="color:#a6e22e">os</span>.<span style="color:#a6e22e">Stdout</span>)
+<span style="color:#a6e22e">io</span>.<span style="color:#a6e22e">WriteString</span>(<span style="color:#a6e22e">sink</span>, <span style="color:#e6db74">&#34;A string written for a file and a tty&#34;</span>)
+</code></pre></div><h3 id="bifurcation-teereader">Bifurcation: TeeReader</h3>
+<p>As you can see in the previous example with the multiwriter, we are setting a bifucartion, so if you write on the result is the same as if you write directly on both writers you passed. The io library has a function that does this the same as the tee UNIX command do with readers:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#75715e">// read from request, create a tee reader and also puts the request on stdout
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">tee</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">io</span>.<span style="color:#a6e22e">TeeReader</span>(<span style="color:#a6e22e">request</span>.<span style="color:#a6e22e">Body</span>, <span style="color:#a6e22e">os</span>.<span style="color:#a6e22e">Stdout</span>)
+<span style="color:#a6e22e">io</span>.<span style="color:#a6e22e">Copy</span>(<span style="color:#a6e22e">tee</span>, <span style="color:#a6e22e">file</span>)
+</code></pre></div>
+</div>
+
+
+    </main>
+
+    
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-163718289-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+  </body>
+</html>

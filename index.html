@@ -3,7 +3,7 @@
 <head>
   <link href="https://gmpg.org/xfn/11" rel="profile">
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
-  <meta name="generator" content="Hugo 0.68.3" />
+  <meta name="generator" content="Hugo 0.70.0" />
 
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -41,7 +41,7 @@
     <nav>
       <ul class="sidebar-nav">
         <li><a href="https://pabloos.github.io/">Home</a> </li>
-        <li><a href="/concurrency/"> concurrency </a></li><li><a href="/testing/"> testing </a></li><li><a href="https://www.linkedin.com/in/pablocdiaz"> linkedin </a></li><li><a href="https://www.github.com/pabloos"> github </a></li><li><a href="mailto:pablocumpia@gmail.com"> email </a></li><li><a href="https://www.twitter.com/PabloCDaz"> twitter </a></li>
+        <li><a href="/concurrency/"> concurrency </a></li><li><a href="/testing/"> testing </a></li><li><a href="/languages/"> languages </a></li><li><a href="https://www.linkedin.com/in/pablocdiaz"> linkedin </a></li><li><a href="https://www.github.com/pabloos"> github </a></li><li><a href="mailto:pablocumpia@gmail.com"> email </a></li><li><a href="https://www.twitter.com/PabloCDaz"> twitter </a></li>
       </ul>
     </nav>
 
@@ -52,6 +52,18 @@
     <main class="content container">
     <div class="posts">
 <article class="post">
+  <h1 class="post-title">
+    <a href="https://pabloos.github.io/languages/usegointerfaces/">Use Go interfaces</a>
+  </h1>
+  <time datetime="2020-06-28T12:43:10&#43;0200" class="post-date">Sun, Jun 28, 2020</time>
+  tl;dr:
+   from\to io.Writer io.Reader string []byte bytes.Buffer     io.Writer &ndash; io.Pipe io.WriteString N/A N/A   io.Reader io.Copy &ndash; strings.Builder N/A N/A   string bytes.NewBufferString strings.NewReader &ndash; []byte(&ldquo;io&rdquo;)    []byte bytes.NewBuffer bytes.New{Reader/Buffer} string(byteSlice) &ndash; bytes.NewBuffer   bytes.Buffer it&rsquo;s it&rsquo;s buf.String buf.bytes &ndash;    Go has become a very popular language, so there&rsquo;s day to day multiple posts and tutorials.
+  
+  <div class="read-more-link">
+    <a href="/languages/usegointerfaces/">Read More…</a>
+  </div>
+  
+</article><article class="post">
   <h1 class="post-title">
     <a href="https://pabloos.github.io/concurrency/pipelines/">Pipelines</a>
   </h1>
