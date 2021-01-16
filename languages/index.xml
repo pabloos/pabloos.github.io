@@ -18,7 +18,7 @@
       
       <guid>https://pabloos.github.io/languages/one2one/</guid>
       <description>The basic idea: a way to get rid of classes There are many well identified classes that only have a one public method, such as iterators, lexers and that kind of walk-on-collections objects:
-class Greet { constructor(greet) { this.greet = greet } greet(name) { console.log(this.greet + &amp;#34; &amp;#34; + name) } } const salut = new Greet(&amp;#34;Hello&amp;#34;) salut.greet(&amp;#34;Pablo&amp;#34;) // Hello Pablo For some cases I use the following instead. That&amp;rsquo;s it, just a functor:</description>
+class Greet { constructor(greet) { this.greet = greet; } greet(name) { console.log(this.greet + &amp;#34; &amp;#34; + name); } } const salut = new Greet(&amp;#34;Hello&amp;#34;); salut.greet(&amp;#34;Pablo&amp;#34;); // Hello Pablo For some cases I use the following instead. That&amp;rsquo;s it, just a functor:</description>
     </item>
     
     <item>

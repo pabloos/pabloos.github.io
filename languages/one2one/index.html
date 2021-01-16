@@ -56,31 +56,31 @@
 <p>There are many well identified classes that only have a one public method, such as iterators, lexers and that kind of walk-on-collections objects:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Greet</span> {
     <span style="color:#a6e22e">constructor</span>(<span style="color:#a6e22e">greet</span>) {
-        <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">greet</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">greet</span>
+        <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">greet</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">greet</span>;
     }
 
     <span style="color:#a6e22e">greet</span>(<span style="color:#a6e22e">name</span>) {
-        <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">greet</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34; &#34;</span> <span style="color:#f92672">+</span>  <span style="color:#a6e22e">name</span>)
+        <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">greet</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34; &#34;</span> <span style="color:#f92672">+</span>  <span style="color:#a6e22e">name</span>);
     }
 }
 
-<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">salut</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Greet</span>(<span style="color:#e6db74">&#34;Hello&#34;</span>)
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">salut</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Greet</span>(<span style="color:#e6db74">&#34;Hello&#34;</span>);
 
-<span style="color:#a6e22e">salut</span>.<span style="color:#a6e22e">greet</span>(<span style="color:#e6db74">&#34;Pablo&#34;</span>) <span style="color:#75715e">// Hello Pablo
+<span style="color:#a6e22e">salut</span>.<span style="color:#a6e22e">greet</span>(<span style="color:#e6db74">&#34;Pablo&#34;</span>); <span style="color:#75715e">// Hello Pablo
 </span></code></pre></div><p>For some cases I use the following instead. That&rsquo;s it, just a functor:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">GreetBuilder</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">greet</span> =&gt; <span style="color:#a6e22e">name</span> =&gt; <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">greet</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34; &#34;</span> <span style="color:#f92672">+</span>  <span style="color:#a6e22e">name</span>)
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">GreetBuilder</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">greet</span> =&gt; <span style="color:#a6e22e">name</span> =&gt; <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">greet</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34; &#34;</span> <span style="color:#f92672">+</span>  <span style="color:#a6e22e">name</span>);
 
-<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">greet</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">GreetBuilder</span>(<span style="color:#e6db74">&#34;Bonjour&#34;</span>)
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">greet</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">GreetBuilder</span>(<span style="color:#e6db74">&#34;Bonjour&#34;</span>);
 
-<span style="color:#a6e22e">greet</span>(<span style="color:#e6db74">&#34;Pablo&#34;</span>) <span style="color:#75715e">// Hello Pablo
+<span style="color:#a6e22e">greet</span>(<span style="color:#e6db74">&#34;Pablo&#34;</span>); <span style="color:#75715e">// Hello Pablo
 </span></code></pre></div><p>As you can see the new way to define &ldquo;classes&rdquo; is more concise. I call this case a 1:1 class: when a class has just one public method.</p>
 <h3 id="private-methods">Private methods</h3>
 <p>Also there are more examples that increases the code complexity by including internal methods. So you can define private methods keeping them as functions defined inside our functor:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#75715e">// the classic approach:
 </span><span style="color:#75715e"></span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Greet</span> {
     <span style="color:#a6e22e">constructor</span>(<span style="color:#a6e22e">greet</span>) {
-        <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">greet</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">greet</span>
-        <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">intensity</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+        <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">greet</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">greet</span>;
+        <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">intensity</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
     }
 
     <span style="color:#a6e22e">greet</span>(<span style="color:#a6e22e">name</span>) {
@@ -113,8 +113,8 @@
 <li>for methods that acts as commands (they don&rsquo;t return nothing), you could use a multiplexer caller inside the function returned. Even less idiomatic, since you need to pass an identifier in order to select each method:</li>
 </ul>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">mult</span> <span style="color:#f92672">=</span> () =&gt; {
-    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">noParams</span> <span style="color:#f92672">=</span> () =&gt; {}
-    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">wParams</span> <span style="color:#f92672">=</span> (<span style="color:#a6e22e">param1</span>, <span style="color:#a6e22e">param2</span>) =&gt; {}
+    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">noParams</span> <span style="color:#f92672">=</span> () =&gt; {};
+    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">wParams</span> <span style="color:#f92672">=</span> (<span style="color:#a6e22e">param1</span>, <span style="color:#a6e22e">param2</span>) =&gt; {};
 
     <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">cmd</span> =&gt; {
         <span style="color:#66d9ef">switch</span>(<span style="color:#a6e22e">cmd</span>) {
@@ -122,7 +122,7 @@
                 <span style="color:#a6e22e">noParams</span>();
                 <span style="color:#66d9ef">break</span>;
             <span style="color:#66d9ef">case</span> <span style="color:#e6db74">&#34;wParams&#34;</span><span style="color:#f92672">:</span>
-                <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">wParams</span> <span style="color:#75715e">// we return the whole function instead of call it to give the caller the chance to pass the params
+                <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">wParams</span>; <span style="color:#75715e">// we return the whole function instead of call it to give the caller the chance to pass the params
 </span><span style="color:#75715e"></span>        }
     }
 }
