@@ -6,17 +6,17 @@
     <description>Recent content in Languages on DevOoops</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 20 Sep 2020 18:38:07 +0200</lastBuildDate>
+    <lastBuildDate>Sat, 16 Jan 2021 21:42:37 +0100</lastBuildDate>
     
 	<atom:link href="https://pabloos.github.io/languages/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
-      <title>1:1 classes</title>
-      <link>https://pabloos.github.io/languages/1to1/</link>
-      <pubDate>Sun, 20 Sep 2020 18:38:07 +0200</pubDate>
+      <title>1:1</title>
+      <link>https://pabloos.github.io/languages/one2one/</link>
+      <pubDate>Sat, 16 Jan 2021 21:42:37 +0100</pubDate>
       
-      <guid>https://pabloos.github.io/languages/1to1/</guid>
+      <guid>https://pabloos.github.io/languages/one2one/</guid>
       <description>The basic idea: a way to get rid of classes There are many well identified classes that only have a one public method, such as iterators, lexers and that kind of walk-on-collections objects:
 class Greet { constructor(greet) { this.greet = greet } greet(name) { console.log(this.greet + &amp;#34; &amp;#34; + name) } } const salut = new Greet(&amp;#34;Hello&amp;#34;) salut.greet(&amp;#34;Pablo&amp;#34;) // Hello Pablo For some cases I use the following instead. That&amp;rsquo;s it, just a functor:</description>
     </item>
