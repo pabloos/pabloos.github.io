@@ -3,7 +3,7 @@
 <head>
   <link href="https://gmpg.org/xfn/11" rel="profile">
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
-  <meta name="generator" content="Hugo 0.70.0" />
+  <meta name="generator" content="Hugo 0.74.3" />
 
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -45,13 +45,25 @@
       </ul>
     </nav>
 
-    <p>&copy; 2020. All rights reserved. </p>
+    <p>&copy; 2021. All rights reserved. </p>
   </div>
 </aside>
 
     <main class="content container">
     <div class="posts">
 <article class="post">
+  <h1 class="post-title">
+    <a href="https://pabloos.github.io/languages/1to1/">1:1 classes</a>
+  </h1>
+  <time datetime="2020-09-20T18:38:07&#43;0200" class="post-date">Sun, Sep 20, 2020</time>
+  The basic idea: a way to get rid of classes There are many well identified classes that only have a one public method, such as iterators, lexers and that kind of walk-on-collections objects:
+class Greet { constructor(greet) { this.greet = greet } greet(name) { console.log(this.greet + &#34; &#34; + name) } } const salut = new Greet(&#34;Hello&#34;) salut.greet(&#34;Pablo&#34;) // Hello Pablo For some cases I use the following instead. That&rsquo;s it, just a functor:
+  
+  <div class="read-more-link">
+    <a href="/languages/1to1/">Read More…</a>
+  </div>
+  
+</article><article class="post">
   <h1 class="post-title">
     <a href="https://pabloos.github.io/languages/usegointerfaces/">Use Go interfaces</a>
   </h1>
