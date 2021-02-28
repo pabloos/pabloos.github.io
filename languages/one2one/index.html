@@ -53,7 +53,7 @@
   <h1>1:1</h1>
   <time datetime=2021-01-16T21:42:37&#43;0100 class="post-date">Sat, Jan 16, 2021</time>
   <h3 id="the-basic-idea-a-way-to-get-rid-of-classes">The basic idea: a way to get rid of classes</h3>
-<p>There are many well identified classes that only have a one public method, such as iterators, lexers and that kind of walk-on-collections objects:</p>
+<p>There are many well identified classes that only have a one public method, such as iterators, lexers and that kind of walk-on-collections objects. I call this case a 1:1 class: when a class has just one public method.</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Greet</span> {
     <span style="color:#a6e22e">constructor</span>(<span style="color:#a6e22e">greet</span>) {
         <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">greet</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">greet</span>;
@@ -73,7 +73,7 @@
 <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">greet</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">GreetBuilder</span>(<span style="color:#e6db74">&#34;Bonjour&#34;</span>);
 
 <span style="color:#a6e22e">greet</span>(<span style="color:#e6db74">&#34;Pablo&#34;</span>); <span style="color:#75715e">// Hello Pablo
-</span></code></pre></div><p>As you can see the new way to define &ldquo;classes&rdquo; is more concise. I call this case a 1:1 class: when a class has just one public method.</p>
+</span></code></pre></div><p>As you can see the new way to define classes is way more concise.</p>
 <h3 id="private-methods">Private methods</h3>
 <p>Also there are more examples that increases the code complexity by including internal methods. So you can define private methods keeping them as functions defined inside our functor:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#75715e">// the classic approach:
