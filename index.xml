@@ -1,15 +1,21 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>by bit</title>
+    <title>bytecora</title>
     <link>https://pabloos.github.io/</link>
-    <description>Recent content on by bit</description>
+    <description>Recent content on bytecora</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 16 Jan 2021 21:42:37 +0100</lastBuildDate>
-    
-	<atom:link href="https://pabloos.github.io/index.xml" rel="self" type="application/rss+xml" />
-    
+    <lastBuildDate>Sun, 20 Nov 2022 17:23:59 +0100</lastBuildDate><atom:link href="https://pabloos.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Semantic middlewares</title>
+      <link>https://pabloos.github.io/backend/middleware/</link>
+      <pubDate>Sun, 20 Nov 2022 17:23:59 +0100</pubDate>
+      
+      <guid>https://pabloos.github.io/backend/middleware/</guid>
+      <description>Piping the request The middleware pattern is an ubiquitous software concept that help us to decoulpe a request process in stages the same way pipeline pattern does. His monoidal nature grants ease of composition, which allow us to reuse any of these stages with other proceses. Moreover, this behaviour arises a declarative way to define our service architecture in semantic terms.
+This post will cover the foundations of this mechanism in the HTTP ecosystem, providing some uses to atomize our handlers, and finally showing up the benefits of this approach to define our architecture.</description>
+    </item>
     
     <item>
       <title>1:1</title>
@@ -28,7 +34,7 @@ class Greet { constructor(greet) { this.greet = greet; } greet(name) { console.l
       
       <guid>https://pabloos.github.io/languages/usegointerfaces/</guid>
       <description>tl;dr:
-   from\to io.Writer io.Reader string []byte bytes.Buffer     io.Writer &amp;ndash; io.Pipe io.WriteString N/A N/A   io.Reader io.Copy &amp;ndash; strings.Builder N/A N/A   string bytes.NewBufferString strings.NewReader &amp;ndash; []byte(&amp;ldquo;io&amp;rdquo;)    []byte bytes.NewBuffer bytes.New{Reader/Buffer} string(byteSlice) &amp;ndash; bytes.NewBuffer   bytes.Buffer it&amp;rsquo;s it&amp;rsquo;s buf.String buf.bytes &amp;ndash;    Go has become a very popular language, so there&amp;rsquo;s day to day multiple posts and tutorials.</description>
+from\to io.Writer io.Reader string []byte bytes.Buffer io.Writer &amp;ndash; io.Pipe io.WriteString N/A N/A io.Reader io.Copy &amp;ndash; strings.Builder N/A N/A string bytes.NewBufferString strings.NewReader &amp;ndash; []byte(&amp;ldquo;io&amp;rdquo;) []byte bytes.NewBuffer bytes.New{Reader/Buffer} string(byteSlice) &amp;ndash; bytes.NewBuffer bytes.Buffer it&amp;rsquo;s it&amp;rsquo;s buf.String buf.bytes &amp;ndash; Go has become a very popular language, so there&amp;rsquo;s day to day multiple posts and tutorials. But so many of them are missusing the basic interfaces, and they are a core design concept. Let&amp;rsquo;s check it:</description>
     </item>
     
     <item>

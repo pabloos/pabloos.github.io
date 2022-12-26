@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Backends on bytecora</title>
+    <link>https://pabloos.github.io/backend/</link>
+    <description>Recent content in Backends on bytecora</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 20 Nov 2022 17:23:59 +0100</lastBuildDate><atom:link href="https://pabloos.github.io/backend/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Semantic middlewares</title>
+      <link>https://pabloos.github.io/backend/middleware/</link>
+      <pubDate>Sun, 20 Nov 2022 17:23:59 +0100</pubDate>
+      
+      <guid>https://pabloos.github.io/backend/middleware/</guid>
+      <description>Piping the request The middleware pattern is an ubiquitous software concept that help us to decoulpe a request process in stages the same way pipeline pattern does. His monoidal nature grants ease of composition, which allow us to reuse any of these stages with other proceses. Moreover, this behaviour arises a declarative way to define our service architecture in semantic terms.
+This post will cover the foundations of this mechanism in the HTTP ecosystem, providing some uses to atomize our handlers, and finally showing up the benefits of this approach to define our architecture.</description>
+    </item>
+    
+  </channel>
+</rss>

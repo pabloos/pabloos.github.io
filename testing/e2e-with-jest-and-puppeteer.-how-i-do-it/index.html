@@ -3,12 +3,12 @@
 <head>
   <link href="https://gmpg.org/xfn/11" rel="profile">
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
-  <meta name="generator" content="Hugo 0.74.3" />
+  <meta name="generator" content="Hugo 0.108.0">
 
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>E2E with Jest And Puppeteer. How I do it. &middot; by bit</title>
+  <title>E2E with Jest And Puppeteer. How I do it. &middot; bytecora</title>
   <meta name="description" content="" />
 
   
@@ -31,20 +31,20 @@
   <aside class="sidebar">
   <div class="container sidebar-sticky">
     <div class="sidebar-about">
-      <a href="https://pabloos.github.io/"><h1>by bit</h1></a>
+      <a href="https://pabloos.github.io/"><h1>bytecora</h1></a>
       <p class="lead">
-       Pablo Cumpian, on software 
+       Composing software 
       </p>
     </div>
 
     <nav>
       <ul class="sidebar-nav">
         <li><a href="https://pabloos.github.io/">Home</a> </li>
-        <li><a href="/concurrency/"> concurrency </a></li><li><a href="/testing/"> testing </a></li><li><a href="/languages/"> languages </a></li><li><a href="https://www.linkedin.com/in/pablocdiaz"> linkedin </a></li><li><a href="https://www.github.com/pabloos"> github </a></li><li><a href="mailto:pablocumpia@gmail.com"> email </a></li><li><a href="https://www.twitter.com/PabloCDaz"> twitter </a></li>
+        <li><a href="/backend/"> backend </a></li><li><a href="/concurrency/"> concurrency </a></li><li><a href="/testing/"> testing </a></li><li><a href="/languages/"> languages </a></li><li><a href="https://www.linkedin.com/in/pablocdiaz"> linkedin </a></li><li><a href="https://www.github.com/pabloos"> github </a></li><li><a href="mailto:pablocumpia@gmail.com"> email </a></li><li><a href="https://www.twitter.com/PabloCDaz"> twitter </a></li>
       </ul>
     </nav>
 
-    <p>&copy; 2021. All rights reserved. </p>
+    <p>&copy; 2022. All rights reserved. </p>
   </div>
 </aside>
 
@@ -56,112 +56,112 @@
 <p>(Note: From now on I assume that you have some experience with the API of both technologies)</p>
 <h3 id="about-the-dependencies">About the dependencies</h3>
 <p>You will find a bunch of posts about this topic on the internet. Some will tell you to install <em>jest-puppeteer</em>, but I don&rsquo;t like the way it works and what it offers to you. <em>jest-puppeteer</em> it&rsquo;s a preset that will &ldquo;insert&rdquo; on your code a browser and a page objects already defined to use on your tests. That means two things: global symbols and a break in your storytelling: where the browser instance comes from? For this reason I prefer to define manually my browser and page instances.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#a6e22e">define</span>(<span style="color:#e6db74">&#39;E2E test suite&#39;</span>, () =&gt; {
-  <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">browser</span>, <span style="color:#a6e22e">page</span>
-
-  <span style="color:#a6e22e">beforeAll</span>(() =&gt; {
-    <span style="color:#a6e22e">browser</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">await</span> <span style="color:#a6e22e">puppeteer</span>.<span style="color:#a6e22e">launch</span>(<span style="color:#a6e22e">config</span>)
-    <span style="color:#a6e22e">page</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">await</span> <span style="color:#a6e22e">browser</span>.<span style="color:#a6e22e">newPage</span>()
-  })
-})
-</code></pre></div><p>If you write this you&rsquo;re telling the story from the beginning: first, setup the environement. But there&rsquo;s another element that until now we&rsquo;re not showing: the server app. And there&rsquo;s when some people would tell you to use the launher built-in on the <em>jest-puppeteer</em> preset. It&rsquo;s usefull, as it run the server via a npm command for you&hellip; but you can do it by yourself (me neither want to exec a shell command from code, that feels tricky for me):</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">app</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;./myApp&#39;</span>)
-
-<span style="color:#a6e22e">define</span>(<span style="color:#e6db74">&#39;E2E test suite&#39;</span>, () =&gt; {
-  <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">server</span>, <span style="color:#a6e22e">browser</span>, <span style="color:#a6e22e">page</span>
-
-  <span style="color:#a6e22e">beforeAll</span>(() =&gt; {
-    <span style="color:#a6e22e">server</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">await</span> <span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">run</span>()
-    <span style="color:#a6e22e">browser</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">await</span> <span style="color:#a6e22e">puppeteer</span>.<span style="color:#a6e22e">launch</span>(<span style="color:#a6e22e">config</span>)
-    <span style="color:#a6e22e">page</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">await</span> <span style="color:#a6e22e">browser</span>.<span style="color:#a6e22e">newPage</span>()
-  })
-
-  <span style="color:#75715e">// ... tests
-</span><span style="color:#75715e"></span>
-  <span style="color:#a6e22e">afterAll</span>(() =&gt; {
-    <span style="color:#a6e22e">await</span> <span style="color:#a6e22e">page</span>.<span style="color:#a6e22e">close</span>()
-    <span style="color:#a6e22e">await</span> <span style="color:#a6e22e">browser</span>.<span style="color:#a6e22e">close</span>()
-    <span style="color:#a6e22e">await</span> <span style="color:#a6e22e">server</span>.<span style="color:#a6e22e">shutdown</span>()
-  })
-})
-</code></pre></div><p>Because of this, now you have a basic landscape with all the actors&hellip; with no unnecesary dependencies.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#a6e22e">define</span>(<span style="color:#e6db74">&#39;E2E test suite&#39;</span>, () =&gt; {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">browser</span>, <span style="color:#a6e22e">page</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">beforeAll</span>(() =&gt; {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">browser</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">puppeteer</span>.<span style="color:#a6e22e">launch</span>(<span style="color:#a6e22e">config</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">page</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">browser</span>.<span style="color:#a6e22e">newPage</span>()
+</span></span><span style="display:flex;"><span>  })
+</span></span><span style="display:flex;"><span>})
+</span></span></code></pre></div><p>If you write this you&rsquo;re telling the story from the beginning: first, setup the environement. But there&rsquo;s another element that until now we&rsquo;re not showing: the server app. And there&rsquo;s when some people would tell you to use the launher built-in on the <em>jest-puppeteer</em> preset. It&rsquo;s usefull, as it run the server via a npm command for you&hellip; but you can do it by yourself (me neither want to exec a shell command from code, that feels tricky for me):</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">app</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;./myApp&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">define</span>(<span style="color:#e6db74">&#39;E2E test suite&#39;</span>, () =&gt; {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">server</span>, <span style="color:#a6e22e">browser</span>, <span style="color:#a6e22e">page</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">beforeAll</span>(() =&gt; {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">server</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">run</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">browser</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">puppeteer</span>.<span style="color:#a6e22e">launch</span>(<span style="color:#a6e22e">config</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">page</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">browser</span>.<span style="color:#a6e22e">newPage</span>()
+</span></span><span style="display:flex;"><span>  })
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// ... tests
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">afterAll</span>(() =&gt; {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">page</span>.<span style="color:#a6e22e">close</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">browser</span>.<span style="color:#a6e22e">close</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">server</span>.<span style="color:#a6e22e">shutdown</span>()
+</span></span><span style="display:flex;"><span>  })
+</span></span><span style="display:flex;"><span>})
+</span></span></code></pre></div><p>Because of this, now you have a basic landscape with all the actors&hellip; with no unnecesary dependencies.</p>
 <h4 id="-hit-me-baby-one-more-time">&hellip; hit me baby one more time</h4>
 <p>A tip for myself that I use on almost every scenario is to reload the page before each test, in case that I need to start every test from the zero state.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#a6e22e">beforeEach</span>(() =&gt; {
-  <span style="color:#a6e22e">await</span> <span style="color:#a6e22e">page</span>.<span style="color:#a6e22e">reload</span>()
-})
-</code></pre></div><p>Now&hellip; the tests.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#a6e22e">beforeEach</span>(() =&gt; {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">page</span>.<span style="color:#a6e22e">reload</span>()
+</span></span><span style="display:flex;"><span>})
+</span></span></code></pre></div><p>Now&hellip; the tests.</p>
 <h3 id="a-simple-test-with-interactions">A simple test with interactions</h3>
 <p>You will find a puppeteer test on every post that seems like a sequential way of interactions with the elements. So let&rsquo;s see an funny example to play with&hellip; a silly statement of income:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#a6e22e">test</span>(<span style="color:#e6db74">&#39;check the interaction&#39;</span>, () =&gt; {
-  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">revenueInput</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">await</span> <span style="color:#a6e22e">page</span>.<span style="color:#a6e22e">$</span>(<span style="color:#e6db74">&#39;input#revenue.form-input&#39;</span>)
-
-  <span style="color:#a6e22e">await</span> <span style="color:#a6e22e">revenueInput</span>.<span style="color:#a6e22e">type</span>(<span style="color:#e6db74">&#39;1000,00&#39;</span>)
-
-  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">expensesInput</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">await</span> <span style="color:#a6e22e">page</span>.<span style="color:#a6e22e">$</span>(<span style="color:#e6db74">&#39;input#expenses.form-input&#39;</span>)
-
-  <span style="color:#a6e22e">await</span> <span style="color:#a6e22e">expensesInput</span>.<span style="color:#a6e22e">type</span>(<span style="color:#e6db74">&#39;2000,00&#39;</span>)
-
-  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">profitInput</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">await</span> <span style="color:#a6e22e">page</span>.<span style="color:#a6e22e">$</span>(<span style="color:#e6db74">&#39;input#profit.form-input&#39;</span>)
-
-  <span style="color:#a6e22e">await</span> <span style="color:#a6e22e">profitInput</span>.<span style="color:#a6e22e">type</span>(<span style="color:#e6db74">&#39;1000,00&#39;</span>)
-
-  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">submitButton</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">await</span> <span style="color:#a6e22e">page</span>.<span style="color:#a6e22e">$</span>(<span style="color:#e6db74">&#39;button#queryButton&#39;</span>)
-
-  <span style="color:#a6e22e">await</span> <span style="color:#a6e22e">submitButton</span>.<span style="color:#a6e22e">click</span>()
-  
-  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">resultBox</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">await</span> <span style="color:#a6e22e">page</span>.<span style="color:#a6e22e">$</span>(<span style="color:#e6db74">&#39;div#resultBox&#39;</span>)
-  
-  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">result</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">resultBox</span>.<span style="color:#a6e22e">value</span>
-  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">expected</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Ok. You should pay $100&#34;</span>
-  
-  <span style="color:#a6e22e">expect</span>(<span style="color:#a6e22e">result</span>).<span style="color:#a6e22e">toBe</span>(<span style="color:#a6e22e">expected</span>)
-})
-</code></pre></div><p>Yes. Great. But it can be better. It can be asyncronous. Until the process logic allows it, you know&hellip;</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#a6e22e">test</span>(<span style="color:#e6db74">&#39;check the interaction&#39;</span>, <span style="color:#a6e22e">async</span> () =&gt; {
-  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">inputQuerys</span> <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;input#revenue.form-input&#39;</span>, <span style="color:#e6db74">&#39;input#expenses.form-input&#39;</span>,<span style="color:#e6db74">&#39;input#profit.form-input&#39;</span>]
-  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">inputData</span> <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;1000,00&#39;</span>, <span style="color:#e6db74">&#39;2000,00&#39;</span>, <span style="color:#e6db74">&#39;1000,00&#39;</span>]
-
-  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">promises</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">inputQuerys</span>.<span style="color:#a6e22e">map</span>((<span style="color:#a6e22e">query</span>, <span style="color:#a6e22e">index</span>) =&gt; <span style="color:#a6e22e">page</span>.<span style="color:#a6e22e">$</span>(<span style="color:#a6e22e">query</span>).<span style="color:#a6e22e">then</span>(<span style="color:#a6e22e">input</span> =&gt; <span style="color:#a6e22e">input</span>.<span style="color:#a6e22e">type</span>(<span style="color:#a6e22e">inputData</span>[<span style="color:#a6e22e">index</span>])))
-
-  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">submitButton</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">await</span> <span style="color:#a6e22e">page</span>.<span style="color:#a6e22e">$</span>(<span style="color:#e6db74">&#39;queryButton&#39;</span>)
-
-  Promise.<span style="color:#a6e22e">all</span>(<span style="color:#a6e22e">promises</span>).<span style="color:#a6e22e">then</span>((<span style="color:#a6e22e">await</span> <span style="color:#a6e22e">submitButton</span>.<span style="color:#a6e22e">click</span>()))
-
-  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">resultBox</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">await</span> <span style="color:#a6e22e">page</span>.<span style="color:#a6e22e">$</span>(<span style="color:#e6db74">&#39;div#resultBox&#39;</span>)
-
-  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">result</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">resultBox</span>.<span style="color:#a6e22e">value</span>
-  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">expected</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Ok. You should pay $100&#34;</span>
-  
-  <span style="color:#a6e22e">expect</span>(<span style="color:#a6e22e">result</span>).<span style="color:#a6e22e">toBe</span>(<span style="color:#a6e22e">expected</span>)
-})
-</code></pre></div><p>This way we give the runtime the chance of make the typing work concurrently and maybe run this kind of heavy tests faster. E2E testing on browser usually gets sooo slow, and on each test you will need to set a big timeout number.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#a6e22e">test</span>(<span style="color:#e6db74">&#39;check the interaction&#39;</span>, () =&gt; {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">revenueInput</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">page</span>.<span style="color:#a6e22e">$</span>(<span style="color:#e6db74">&#39;input#revenue.form-input&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">revenueInput</span>.<span style="color:#a6e22e">type</span>(<span style="color:#e6db74">&#39;1000,00&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">expensesInput</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">page</span>.<span style="color:#a6e22e">$</span>(<span style="color:#e6db74">&#39;input#expenses.form-input&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">expensesInput</span>.<span style="color:#a6e22e">type</span>(<span style="color:#e6db74">&#39;2000,00&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">profitInput</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">page</span>.<span style="color:#a6e22e">$</span>(<span style="color:#e6db74">&#39;input#profit.form-input&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">profitInput</span>.<span style="color:#a6e22e">type</span>(<span style="color:#e6db74">&#39;1000,00&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">submitButton</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">page</span>.<span style="color:#a6e22e">$</span>(<span style="color:#e6db74">&#39;button#queryButton&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">submitButton</span>.<span style="color:#a6e22e">click</span>()
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">resultBox</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">page</span>.<span style="color:#a6e22e">$</span>(<span style="color:#e6db74">&#39;div#resultBox&#39;</span>)
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">result</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">resultBox</span>.<span style="color:#a6e22e">value</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">expected</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Ok. You should pay $100&#34;</span>
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">expect</span>(<span style="color:#a6e22e">result</span>).<span style="color:#a6e22e">toBe</span>(<span style="color:#a6e22e">expected</span>)
+</span></span><span style="display:flex;"><span>})
+</span></span></code></pre></div><p>Yes. Great. But it can be better. It can be asyncronous. Until the process logic allows it, you know&hellip;</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#a6e22e">test</span>(<span style="color:#e6db74">&#39;check the interaction&#39;</span>, <span style="color:#66d9ef">async</span> () =&gt; {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">inputQuerys</span> <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;input#revenue.form-input&#39;</span>, <span style="color:#e6db74">&#39;input#expenses.form-input&#39;</span>,<span style="color:#e6db74">&#39;input#profit.form-input&#39;</span>]
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">inputData</span> <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;1000,00&#39;</span>, <span style="color:#e6db74">&#39;2000,00&#39;</span>, <span style="color:#e6db74">&#39;1000,00&#39;</span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">promises</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">inputQuerys</span>.<span style="color:#a6e22e">map</span>((<span style="color:#a6e22e">query</span>, <span style="color:#a6e22e">index</span>) =&gt; <span style="color:#a6e22e">page</span>.<span style="color:#a6e22e">$</span>(<span style="color:#a6e22e">query</span>).<span style="color:#a6e22e">then</span>(<span style="color:#a6e22e">input</span> =&gt; <span style="color:#a6e22e">input</span>.<span style="color:#a6e22e">type</span>(<span style="color:#a6e22e">inputData</span>[<span style="color:#a6e22e">index</span>])))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">submitButton</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">page</span>.<span style="color:#a6e22e">$</span>(<span style="color:#e6db74">&#39;queryButton&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  Promise.<span style="color:#a6e22e">all</span>(<span style="color:#a6e22e">promises</span>).<span style="color:#a6e22e">then</span>((<span style="color:#66d9ef">await</span> <span style="color:#a6e22e">submitButton</span>.<span style="color:#a6e22e">click</span>()))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">resultBox</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">page</span>.<span style="color:#a6e22e">$</span>(<span style="color:#e6db74">&#39;div#resultBox&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">result</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">resultBox</span>.<span style="color:#a6e22e">value</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">expected</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Ok. You should pay $100&#34;</span>
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">expect</span>(<span style="color:#a6e22e">result</span>).<span style="color:#a6e22e">toBe</span>(<span style="color:#a6e22e">expected</span>)
+</span></span><span style="display:flex;"><span>})
+</span></span></code></pre></div><p>This way we give the runtime the chance of make the typing work concurrently and maybe run this kind of heavy tests faster. E2E testing on browser usually gets sooo slow, and on each test you will need to set a big timeout number.</p>
 <h3 id="table-driven-tests-refactor">Table-Driven tests refactor</h3>
 <p>Yeah, but it could be even better, Table-Driven Tests to the rescue!</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript">  <span style="color:#a6e22e">test</span>.<span style="color:#a6e22e">each</span><span style="color:#e6db74">`
-</span><span style="color:#e6db74">  revenue    | expenses   | profit     | expected
-</span><span style="color:#e6db74">  </span><span style="color:#e6db74">${</span><span style="color:#e6db74">`1,000`</span><span style="color:#e6db74">}</span><span style="color:#e6db74"> | </span><span style="color:#e6db74">${</span><span style="color:#e6db74">&#39;2,000&#39;</span><span style="color:#e6db74">}</span><span style="color:#e6db74"> | </span><span style="color:#e6db74">${</span><span style="color:#e6db74">`1,000`</span><span style="color:#e6db74">}</span><span style="color:#e6db74"> | </span><span style="color:#e6db74">${</span><span style="color:#e6db74">`You must pay $100`</span><span style="color:#e6db74">}</span><span style="color:#e6db74">
-</span><span style="color:#e6db74">  </span><span style="color:#e6db74">${</span><span style="color:#e6db74">`3,000`</span><span style="color:#e6db74">}</span><span style="color:#e6db74"> | </span><span style="color:#e6db74">${</span><span style="color:#e6db74">&#39;2,000&#39;</span><span style="color:#e6db74">}</span><span style="color:#e6db74"> | </span><span style="color:#e6db74">${</span><span style="color:#e6db74">`5,000`</span><span style="color:#e6db74">}</span><span style="color:#e6db74"> | </span><span style="color:#e6db74">${</span><span style="color:#e6db74">`You must pay $600`</span><span style="color:#e6db74">}</span><span style="color:#e6db74">
-</span><span style="color:#e6db74">  </span><span style="color:#e6db74">${</span><span style="color:#e6db74">`1,00`</span><span style="color:#e6db74">}</span><span style="color:#e6db74">  | </span><span style="color:#e6db74">${</span><span style="color:#e6db74">&#39;2,00&#39;</span><span style="color:#e6db74">}</span><span style="color:#e6db74">  | </span><span style="color:#e6db74">${</span><span style="color:#e6db74">`300`</span><span style="color:#e6db74">}</span><span style="color:#e6db74">   | </span><span style="color:#e6db74">${</span><span style="color:#e6db74">`You mustn&#39;t pay anything`</span><span style="color:#e6db74">}</span><span style="color:#e6db74">
-</span><span style="color:#e6db74">  `</span>
-  
-  (<span style="color:#e6db74">&#39;E2E taxes: $revenue, $expenses, $profit =&gt; $expected&#39;</span>, <span style="color:#a6e22e">testCase</span> =&gt; {
-    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">inputQuerys</span> <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;input#name&#39;</span>, <span style="color:#e6db74">&#39;input#address&#39;</span>,<span style="color:#e6db74">&#39;input#phone&#39;</span>]
-    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">inputData</span> <span style="color:#f92672">=</span> Object.<span style="color:#a6e22e">values</span>(<span style="color:#a6e22e">testCase</span>)
-
-    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">inputs</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">inputQuerys</span>.<span style="color:#a6e22e">map</span>((<span style="color:#a6e22e">inputQuery</span>, <span style="color:#a6e22e">index</span>) =&gt; <span style="color:#a6e22e">page</span>.<span style="color:#a6e22e">$</span>(<span style="color:#a6e22e">inputQuery</span>).<span style="color:#a6e22e">then</span>(<span style="color:#a6e22e">input</span> =&gt; <span style="color:#a6e22e">input</span>.<span style="color:#a6e22e">type</span>(<span style="color:#a6e22e">inputData</span>[<span style="color:#a6e22e">index</span>])))
-
-    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">submitButton</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">await</span> <span style="color:#a6e22e">page</span>.<span style="color:#a6e22e">$</span>(<span style="color:#e6db74">&#39;queryButton&#39;</span>)
-
-    Promise.<span style="color:#a6e22e">all</span>(<span style="color:#a6e22e">inputs</span>).<span style="color:#a6e22e">then</span>((<span style="color:#a6e22e">await</span> <span style="color:#a6e22e">submitButton</span>.<span style="color:#a6e22e">click</span>()))
-
-    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">resultBox</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">await</span> <span style="color:#a6e22e">page</span>.<span style="color:#a6e22e">$</span>(<span style="color:#e6db74">&#39;div#resultBox&#39;</span>)
-
-    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">result</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">resultBox</span>.<span style="color:#a6e22e">value</span>
-
-    <span style="color:#a6e22e">expect</span>(<span style="color:#a6e22e">result</span>).<span style="color:#a6e22e">toBe</span>(<span style="color:#a6e22e">testCase</span>.<span style="color:#a6e22e">expected</span>)
-  })
-</code></pre></div><p>This way you can define all of your tests cases on the table and use the same function on each of them. It&rsquo;s more legible, you decouple data and functionality, and it allows you to add more tests cases with ease.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span>  <span style="color:#a6e22e">test</span>.<span style="color:#a6e22e">each</span><span style="color:#e6db74">`
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  revenue    | expenses   | profit     | expected
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  </span><span style="color:#e6db74">${</span><span style="color:#e6db74">`1,000`</span><span style="color:#e6db74">}</span><span style="color:#e6db74"> | </span><span style="color:#e6db74">${</span><span style="color:#e6db74">&#39;2,000&#39;</span><span style="color:#e6db74">}</span><span style="color:#e6db74"> | </span><span style="color:#e6db74">${</span><span style="color:#e6db74">`1,000`</span><span style="color:#e6db74">}</span><span style="color:#e6db74"> | </span><span style="color:#e6db74">${</span><span style="color:#e6db74">`You must pay $100`</span><span style="color:#e6db74">}</span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  </span><span style="color:#e6db74">${</span><span style="color:#e6db74">`3,000`</span><span style="color:#e6db74">}</span><span style="color:#e6db74"> | </span><span style="color:#e6db74">${</span><span style="color:#e6db74">&#39;2,000&#39;</span><span style="color:#e6db74">}</span><span style="color:#e6db74"> | </span><span style="color:#e6db74">${</span><span style="color:#e6db74">`5,000`</span><span style="color:#e6db74">}</span><span style="color:#e6db74"> | </span><span style="color:#e6db74">${</span><span style="color:#e6db74">`You must pay $600`</span><span style="color:#e6db74">}</span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  </span><span style="color:#e6db74">${</span><span style="color:#e6db74">`1,00`</span><span style="color:#e6db74">}</span><span style="color:#e6db74">  | </span><span style="color:#e6db74">${</span><span style="color:#e6db74">&#39;2,00&#39;</span><span style="color:#e6db74">}</span><span style="color:#e6db74">  | </span><span style="color:#e6db74">${</span><span style="color:#e6db74">`300`</span><span style="color:#e6db74">}</span><span style="color:#e6db74">   | </span><span style="color:#e6db74">${</span><span style="color:#e6db74">`You mustn&#39;t pay anything`</span><span style="color:#e6db74">}</span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  `</span>
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  (<span style="color:#e6db74">&#39;E2E taxes: $revenue, $expenses, $profit =&gt; $expected&#39;</span>, <span style="color:#a6e22e">testCase</span> =&gt; {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">inputQuerys</span> <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;input#name&#39;</span>, <span style="color:#e6db74">&#39;input#address&#39;</span>,<span style="color:#e6db74">&#39;input#phone&#39;</span>]
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">inputData</span> <span style="color:#f92672">=</span> Object.<span style="color:#a6e22e">values</span>(<span style="color:#a6e22e">testCase</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">inputs</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">inputQuerys</span>.<span style="color:#a6e22e">map</span>((<span style="color:#a6e22e">inputQuery</span>, <span style="color:#a6e22e">index</span>) =&gt; <span style="color:#a6e22e">page</span>.<span style="color:#a6e22e">$</span>(<span style="color:#a6e22e">inputQuery</span>).<span style="color:#a6e22e">then</span>(<span style="color:#a6e22e">input</span> =&gt; <span style="color:#a6e22e">input</span>.<span style="color:#a6e22e">type</span>(<span style="color:#a6e22e">inputData</span>[<span style="color:#a6e22e">index</span>])))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">submitButton</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">page</span>.<span style="color:#a6e22e">$</span>(<span style="color:#e6db74">&#39;queryButton&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    Promise.<span style="color:#a6e22e">all</span>(<span style="color:#a6e22e">inputs</span>).<span style="color:#a6e22e">then</span>((<span style="color:#66d9ef">await</span> <span style="color:#a6e22e">submitButton</span>.<span style="color:#a6e22e">click</span>()))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">resultBox</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">page</span>.<span style="color:#a6e22e">$</span>(<span style="color:#e6db74">&#39;div#resultBox&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">result</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">resultBox</span>.<span style="color:#a6e22e">value</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">expect</span>(<span style="color:#a6e22e">result</span>).<span style="color:#a6e22e">toBe</span>(<span style="color:#a6e22e">testCase</span>.<span style="color:#a6e22e">expected</span>)
+</span></span><span style="display:flex;"><span>  })
+</span></span></code></pre></div><p>This way you can define all of your tests cases on the table and use the same function on each of them. It&rsquo;s more legible, you decouple data and functionality, and it allows you to add more tests cases with ease.</p>
 
 </div>
 

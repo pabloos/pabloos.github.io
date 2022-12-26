@@ -3,12 +3,12 @@
 <head>
   <link href="https://gmpg.org/xfn/11" rel="profile">
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
-  <meta name="generator" content="Hugo 0.74.3" />
+  <meta name="generator" content="Hugo 0.108.0">
 
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Pipelines &middot; by bit</title>
+  <title>Pipelines &middot; bytecora</title>
   <meta name="description" content="" />
 
   
@@ -31,20 +31,20 @@
   <aside class="sidebar">
   <div class="container sidebar-sticky">
     <div class="sidebar-about">
-      <a href="https://pabloos.github.io/"><h1>by bit</h1></a>
+      <a href="https://pabloos.github.io/"><h1>bytecora</h1></a>
       <p class="lead">
-       Pablo Cumpian, on software 
+       Composing software 
       </p>
     </div>
 
     <nav>
       <ul class="sidebar-nav">
         <li><a href="https://pabloos.github.io/">Home</a> </li>
-        <li><a href="/concurrency/"> concurrency </a></li><li><a href="/testing/"> testing </a></li><li><a href="/languages/"> languages </a></li><li><a href="https://www.linkedin.com/in/pablocdiaz"> linkedin </a></li><li><a href="https://www.github.com/pabloos"> github </a></li><li><a href="mailto:pablocumpia@gmail.com"> email </a></li><li><a href="https://www.twitter.com/PabloCDaz"> twitter </a></li>
+        <li><a href="/backend/"> backend </a></li><li><a href="/concurrency/"> concurrency </a></li><li><a href="/testing/"> testing </a></li><li><a href="/languages/"> languages </a></li><li><a href="https://www.linkedin.com/in/pablocdiaz"> linkedin </a></li><li><a href="https://www.github.com/pabloos"> github </a></li><li><a href="mailto:pablocumpia@gmail.com"> email </a></li><li><a href="https://www.twitter.com/PabloCDaz"> twitter </a></li>
       </ul>
     </nav>
 
-    <p>&copy; 2021. All rights reserved. </p>
+    <p>&copy; 2022. All rights reserved. </p>
   </div>
 </aside>
 
@@ -56,167 +56,167 @@
 <p>All the code used here is on my github: <a href="https://github.com/pabloos/my-go-pipeline-pattern">pabloos</a>. Keep an eye on it, for clarity I will not reference all the functions. Each section has his own branch.</p>
 <h5 id="1-original-sketch">1. Original Sketch</h5>
 <p>A pipeline is not unlike an assembly line: a queue of jobs that transform an input and sends it to the next stage. In Go an obvious implementation would be based on channels (<a href="https://blog.golang.org/pipelines">originally based on an idea in the oficial blog</a>), in which each function represents a separate stage connected with the next one using a channel.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">pipe</span> <span style="color:#f92672">&lt;-</span><span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">int</span>
-</code></pre></div><p>Thus, the stage&rsquo;s header should be:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">stage</span>(<span style="color:#a6e22e">in</span> <span style="color:#a6e22e">pipe</span>) <span style="color:#a6e22e">pipe</span>
-</code></pre></div><p>Also, two more stages for the start and end queue are needed:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">source</span>(<span style="color:#a6e22e">numbers</span> <span style="color:#f92672">...</span><span style="color:#66d9ef">int</span>) <span style="color:#a6e22e">pipe</span>
-</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">end</span>(<span style="color:#a6e22e">in</span> <span style="color:#a6e22e">pipe</span>) []<span style="color:#66d9ef">int</span>
-</code></pre></div><p>The source receives the inputm and the end stage returns an integer array. The point here is that all the async actions are wraped between the stages through channels, so we only need to keep care of the input and output types.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">pipe</span> <span style="color:#f92672">&lt;-</span><span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">int</span>
+</span></span></code></pre></div><p>Thus, the stage&rsquo;s header should be:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">stage</span>(<span style="color:#a6e22e">in</span> <span style="color:#a6e22e">pipe</span>) <span style="color:#a6e22e">pipe</span>
+</span></span></code></pre></div><p>Also, two more stages for the start and end queue are needed:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">source</span>(<span style="color:#a6e22e">numbers</span> <span style="color:#f92672">...</span><span style="color:#66d9ef">int</span>) <span style="color:#a6e22e">pipe</span>
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">end</span>(<span style="color:#a6e22e">in</span> <span style="color:#a6e22e">pipe</span>) []<span style="color:#66d9ef">int</span>
+</span></span></code></pre></div><p>The source receives the inputm and the end stage returns an integer array. The point here is that all the async actions are wraped between the stages through channels, so we only need to keep care of the input and output types.</p>
 <p>Here is an example of a whole pipeline that performs a simple job on each stage:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">source</span>(<span style="color:#a6e22e">numbers</span> <span style="color:#f92672">...</span><span style="color:#66d9ef">int</span>) <span style="color:#a6e22e">pipe</span> {
-    <span style="color:#a6e22e">out</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">int</span>)
-
-    <span style="color:#66d9ef">go</span> <span style="color:#66d9ef">func</span>() {
-        <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">n</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">numbers</span> {
-            <span style="color:#a6e22e">out</span> <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">n</span>
-        }
-        close(<span style="color:#a6e22e">out</span>)
-    }()
-
-    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">out</span>
-}
-
-<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">firstStage</span>(<span style="color:#a6e22e">in</span> <span style="color:#a6e22e">pipe</span>) <span style="color:#a6e22e">pipe</span> {
-    <span style="color:#a6e22e">out</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">int</span>)
-
-    <span style="color:#66d9ef">go</span> <span style="color:#66d9ef">func</span>() {
-        <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">n</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">in</span> {
-            <span style="color:#a6e22e">out</span> <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">n</span> <span style="color:#f92672">*</span> <span style="color:#a6e22e">n</span>
-        }
-        close(<span style="color:#a6e22e">out</span>)
-    }()
-
-    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">out</span>
-}
-
-<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">secondStage</span>(<span style="color:#a6e22e">in</span> <span style="color:#a6e22e">pipe</span>) <span style="color:#a6e22e">pipe</span> {
-    <span style="color:#f92672">...</span> <span style="color:#75715e">//same logic as the way above
-</span><span style="color:#75715e"></span>}
-
-<span style="color:#f92672">...</span>
-
-<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">end</span>(<span style="color:#a6e22e">in</span> <span style="color:#f92672">&lt;-</span><span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">int</span>) []<span style="color:#66d9ef">int</span> {
-    <span style="color:#a6e22e">out</span> <span style="color:#f92672">:=</span> make([]<span style="color:#66d9ef">int</span>, <span style="color:#ae81ff">0</span>)
-
-    <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">wg</span> <span style="color:#a6e22e">sync</span>.<span style="color:#a6e22e">WaitGroup</span>
-
-    <span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Add</span>(<span style="color:#ae81ff">1</span>)
-
-    <span style="color:#66d9ef">go</span> <span style="color:#66d9ef">func</span>() {
-        <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">n</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">in</span> {
-            <span style="color:#a6e22e">out</span> = append(<span style="color:#a6e22e">out</span>, <span style="color:#a6e22e">n</span>)
-        }
-        <span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Done</span>()
-    }()
-
-    <span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Wait</span>()
-
-    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">out</span>
-}
-</code></pre></div><p>As you can see, we need a Barrier pattern as a WaitGroup in the end function to wait for all the responses sent by the previous stage.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">source</span>(<span style="color:#a6e22e">numbers</span> <span style="color:#f92672">...</span><span style="color:#66d9ef">int</span>) <span style="color:#a6e22e">pipe</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">out</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">int</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">go</span> <span style="color:#66d9ef">func</span>() {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">n</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">numbers</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">out</span> <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">n</span>
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        close(<span style="color:#a6e22e">out</span>)
+</span></span><span style="display:flex;"><span>    }()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">out</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">firstStage</span>(<span style="color:#a6e22e">in</span> <span style="color:#a6e22e">pipe</span>) <span style="color:#a6e22e">pipe</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">out</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">int</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">go</span> <span style="color:#66d9ef">func</span>() {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">n</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">in</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">out</span> <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">n</span> <span style="color:#f92672">*</span> <span style="color:#a6e22e">n</span>
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        close(<span style="color:#a6e22e">out</span>)
+</span></span><span style="display:flex;"><span>    }()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">out</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">secondStage</span>(<span style="color:#a6e22e">in</span> <span style="color:#a6e22e">pipe</span>) <span style="color:#a6e22e">pipe</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">...</span> <span style="color:#75715e">//same logic as the way above
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">...</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">end</span>(<span style="color:#a6e22e">in</span> <span style="color:#f92672">&lt;-</span><span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">int</span>) []<span style="color:#66d9ef">int</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">out</span> <span style="color:#f92672">:=</span> make([]<span style="color:#66d9ef">int</span>, <span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">wg</span> <span style="color:#a6e22e">sync</span>.<span style="color:#a6e22e">WaitGroup</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Add</span>(<span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">go</span> <span style="color:#66d9ef">func</span>() {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">n</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">in</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">out</span> = append(<span style="color:#a6e22e">out</span>, <span style="color:#a6e22e">n</span>)
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Done</span>()
+</span></span><span style="display:flex;"><span>    }()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Wait</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">out</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>As you can see, we need a Barrier pattern as a WaitGroup in the end function to wait for all the responses sent by the previous stage.</p>
 <p>In order to run the pipeline you need to nest every stage into the next one:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
-    <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">n</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">end</span>(<span style="color:#a6e22e">thirdStage</span>(<span style="color:#a6e22e">secondStage</span>(<span style="color:#a6e22e">firstStage</span>(<span style="color:#a6e22e">source</span>(<span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">34</span>))))) {
-        <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#a6e22e">n</span>)
-    }
-}
-</code></pre></div><h5 id="2-a-refactor-proposal">2. A refactor proposal</h5>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">n</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">end</span>(<span style="color:#a6e22e">thirdStage</span>(<span style="color:#a6e22e">secondStage</span>(<span style="color:#a6e22e">firstStage</span>(<span style="color:#a6e22e">source</span>(<span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">34</span>))))) {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#a6e22e">n</span>)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h5 id="2-a-refactor-proposal">2. A refactor proposal</h5>
 <p>There are some obvious improvements to the code above:</p>
 <ul>
 <li>All the stages have the same header. So it could be an user-defined type; we will use this later:</li>
 </ul>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">stage</span> <span style="color:#66d9ef">func</span>(<span style="color:#a6e22e">pipe</span>) <span style="color:#a6e22e">pipe</span>
-</code></pre></div><ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">stage</span> <span style="color:#66d9ef">func</span>(<span style="color:#a6e22e">pipe</span>) <span style="color:#a6e22e">pipe</span>
+</span></span></code></pre></div><ul>
 <li>All of them, also, have the same statements inside. The only diference is the mutation, so&hellip;</li>
 </ul>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">modifier</span> <span style="color:#66d9ef">func</span>(<span style="color:#66d9ef">int</span>) <span style="color:#66d9ef">int</span>
-</code></pre></div><ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">modifier</span> <span style="color:#66d9ef">func</span>(<span style="color:#66d9ef">int</span>) <span style="color:#66d9ef">int</span>
+</span></span></code></pre></div><ul>
 <li>
 <p>The previous approach seems to mix the structure and the business logic. This is not desirable. We can decouple both by injecting the modifier in a function-composition manner:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">firstStage</span>(<span style="color:#a6e22e">in</span> <span style="color:#a6e22e">pipe</span>, <span style="color:#a6e22e">mod</span> <span style="color:#a6e22e">modifier</span>) <span style="color:#a6e22e">pipe</span> {
-    <span style="color:#a6e22e">out</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">int</span>)
-    <span style="color:#66d9ef">go</span> <span style="color:#a6e22e">send</span>(<span style="color:#a6e22e">out</span>, <span style="color:#a6e22e">in</span>, <span style="color:#a6e22e">mod</span>)
-    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">out</span>
-}
-</code></pre></div></li>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">firstStage</span>(<span style="color:#a6e22e">in</span> <span style="color:#a6e22e">pipe</span>, <span style="color:#a6e22e">mod</span> <span style="color:#a6e22e">modifier</span>) <span style="color:#a6e22e">pipe</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">out</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">int</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">go</span> <span style="color:#a6e22e">send</span>(<span style="color:#a6e22e">out</span>, <span style="color:#a6e22e">in</span>, <span style="color:#a6e22e">mod</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">out</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div></li>
 <li>
 <p>Also the async function has only one responsability: send the result. So it&rsquo;s another candidate to be injected as we did above with the modifier.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">send</span>(<span style="color:#a6e22e">outChan</span> <span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">int</span>, <span style="color:#a6e22e">inChan</span> <span style="color:#a6e22e">pipe</span>, <span style="color:#a6e22e">mod</span> <span style="color:#a6e22e">modifier</span>) {
-    <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">n</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">inChan</span> {
-        <span style="color:#a6e22e">outChan</span> <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">mod</span>(<span style="color:#a6e22e">n</span>)
-    }
-    close(<span style="color:#a6e22e">outChan</span>)
-}
-</code></pre></div></li>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">send</span>(<span style="color:#a6e22e">outChan</span> <span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">int</span>, <span style="color:#a6e22e">inChan</span> <span style="color:#a6e22e">pipe</span>, <span style="color:#a6e22e">mod</span> <span style="color:#a6e22e">modifier</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">n</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">inChan</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">outChan</span> <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">mod</span>(<span style="color:#a6e22e">n</span>)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    close(<span style="color:#a6e22e">outChan</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div></li>
 </ul>
 <p>Decoupling all these things brings us the chance to test easily. That&rsquo;s for unit testing&hellip; but what about to see the pattern as a structure to check with integration tests?</p>
 <h5 id="3-pattern-as-an-object-autogenerate-the-stages">3. Pattern as an object. Autogenerate the stages</h5>
 <p>We could present all the elemets as a struct:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">type</span> (
-    <span style="color:#a6e22e">pipe</span>     <span style="color:#f92672">&lt;-</span><span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">int</span>
-    <span style="color:#a6e22e">source</span>   <span style="color:#66d9ef">func</span>(<span style="color:#f92672">...</span><span style="color:#66d9ef">int</span>) <span style="color:#a6e22e">pipe</span>
-    <span style="color:#a6e22e">end</span>      <span style="color:#66d9ef">func</span>(<span style="color:#a6e22e">pipe</span>) []<span style="color:#66d9ef">int</span>
-    <span style="color:#a6e22e">stage</span>    <span style="color:#66d9ef">func</span>(<span style="color:#a6e22e">pipe</span>) <span style="color:#a6e22e">pipe</span>
-    <span style="color:#a6e22e">stages</span>   []<span style="color:#a6e22e">stage</span>
-
-    <span style="color:#a6e22e">Pipeline</span> <span style="color:#66d9ef">struct</span> {
-        <span style="color:#a6e22e">source</span>
-        <span style="color:#a6e22e">stages</span>
-        <span style="color:#a6e22e">end</span>
-    }
-)
-</code></pre></div><p>Also, stages can be autogenerated as we can inject the modifiers:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">NewPipeline</span>(<span style="color:#a6e22e">source</span> <span style="color:#a6e22e">source</span>, <span style="color:#a6e22e">end</span> <span style="color:#a6e22e">end</span>, <span style="color:#a6e22e">modifiers</span> <span style="color:#f92672">...</span><span style="color:#a6e22e">modifier</span>) <span style="color:#f92672">*</span><span style="color:#a6e22e">Pipeline</span> {
-    <span style="color:#66d9ef">return</span> <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">Pipeline</span>{
-        <span style="color:#a6e22e">source</span>,
-        <span style="color:#a6e22e">genStages</span>(<span style="color:#a6e22e">modifiers</span><span style="color:#f92672">...</span>),
-        <span style="color:#a6e22e">end</span>,
-    }
-}
-
-<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">genStages</span>(<span style="color:#a6e22e">modifiers</span> <span style="color:#f92672">...</span><span style="color:#a6e22e">modifier</span>) <span style="color:#a6e22e">stages</span> {
-    <span style="color:#a6e22e">stages</span> <span style="color:#f92672">:=</span> make(<span style="color:#a6e22e">stages</span>, <span style="color:#ae81ff">0</span>)
-
-    <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">modifier</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">modifiers</span> {
-        <span style="color:#a6e22e">stages</span> = append(<span style="color:#a6e22e">stages</span>, <span style="color:#a6e22e">getStage</span>(<span style="color:#a6e22e">modifier</span>))
-    }
-
-    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">stages</span>
-}
-
-<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">getStage</span>(<span style="color:#a6e22e">mod</span> <span style="color:#a6e22e">modifier</span>) <span style="color:#a6e22e">stage</span> {
-    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">func</span>(<span style="color:#a6e22e">input</span> <span style="color:#a6e22e">pipe</span>) <span style="color:#a6e22e">pipe</span> {
-        <span style="color:#a6e22e">output</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">int</span>)
-
-        <span style="color:#66d9ef">go</span> <span style="color:#a6e22e">send</span>(<span style="color:#a6e22e">output</span>, <span style="color:#a6e22e">input</span>, <span style="color:#a6e22e">mod</span>)
-
-        <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">output</span>
-    }
-}
-</code></pre></div><p>So, when we want to run the pipeline we only need to deploy the stages in the same order as we specified them and then consume the data stream at each stage:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">pip</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">Pipeline</span>) <span style="color:#a6e22e">Exec</span>(<span style="color:#a6e22e">input</span> <span style="color:#f92672">...</span><span style="color:#66d9ef">int</span>) []<span style="color:#66d9ef">int</span> {
-    <span style="color:#a6e22e">lastStageIndex</span> <span style="color:#f92672">:=</span> len(<span style="color:#a6e22e">pip</span>.<span style="color:#a6e22e">stages</span>) <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>
-
-    <span style="color:#a6e22e">start</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">pip</span>.<span style="color:#a6e22e">source</span>(<span style="color:#a6e22e">input</span><span style="color:#f92672">...</span>)
-
-    <span style="color:#a6e22e">result</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">pip</span>.<span style="color:#a6e22e">stages</span>[<span style="color:#ae81ff">0</span>](<span style="color:#a6e22e">start</span>)
-
-    <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">1</span>; <span style="color:#a6e22e">i</span> &lt; <span style="color:#a6e22e">lastStageIndex</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span> {
-        <span style="color:#a6e22e">result</span> = <span style="color:#a6e22e">pip</span>.<span style="color:#a6e22e">stages</span>[<span style="color:#a6e22e">i</span>](<span style="color:#a6e22e">result</span>)
-    }
-
-    <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">lastStageIndex</span> <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span> { <span style="color:#75715e">// if it&#39;s a single stage we don&#39;t want to remake the last stage (as it&#39;s also the first again)
-</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">pip</span>.<span style="color:#a6e22e">end</span>(<span style="color:#a6e22e">result</span>)
-    }
-
-    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">pip</span>.<span style="color:#a6e22e">end</span>(<span style="color:#a6e22e">pip</span>.<span style="color:#a6e22e">stages</span>[<span style="color:#a6e22e">lastStageIndex</span>](<span style="color:#a6e22e">result</span>))
-}
-</code></pre></div><p>The call is cleaner than the previous ones, as you can see:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go">    <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">number</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">NewPipeline</span>(<span style="color:#a6e22e">start</span>, <span style="color:#a6e22e">final</span>, <span style="color:#a6e22e">add2</span>, <span style="color:#a6e22e">square</span>, <span style="color:#a6e22e">add2</span>).<span style="color:#a6e22e">Exec</span>(<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">4</span>, <span style="color:#ae81ff">5</span>) {
-        <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#a6e22e">number</span>)
-    }
-</code></pre></div><h5 id="4-the-flow-lasts-a-bit-longer">4. The flow lasts a bit longer&hellip;</h5>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">type</span> (
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">pipe</span>     <span style="color:#f92672">&lt;-</span><span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">int</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">source</span>   <span style="color:#66d9ef">func</span>(<span style="color:#f92672">...</span><span style="color:#66d9ef">int</span>) <span style="color:#a6e22e">pipe</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">end</span>      <span style="color:#66d9ef">func</span>(<span style="color:#a6e22e">pipe</span>) []<span style="color:#66d9ef">int</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">stage</span>    <span style="color:#66d9ef">func</span>(<span style="color:#a6e22e">pipe</span>) <span style="color:#a6e22e">pipe</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">stages</span>   []<span style="color:#a6e22e">stage</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">Pipeline</span> <span style="color:#66d9ef">struct</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">source</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">stages</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">end</span>
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>)
+</span></span></code></pre></div><p>Also, stages can be autogenerated as we can inject the modifiers:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">NewPipeline</span>(<span style="color:#a6e22e">source</span> <span style="color:#a6e22e">source</span>, <span style="color:#a6e22e">end</span> <span style="color:#a6e22e">end</span>, <span style="color:#a6e22e">modifiers</span> <span style="color:#f92672">...</span><span style="color:#a6e22e">modifier</span>) <span style="color:#f92672">*</span><span style="color:#a6e22e">Pipeline</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">Pipeline</span>{
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">source</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">genStages</span>(<span style="color:#a6e22e">modifiers</span><span style="color:#f92672">...</span>),
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">end</span>,
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">genStages</span>(<span style="color:#a6e22e">modifiers</span> <span style="color:#f92672">...</span><span style="color:#a6e22e">modifier</span>) <span style="color:#a6e22e">stages</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">stages</span> <span style="color:#f92672">:=</span> make(<span style="color:#a6e22e">stages</span>, <span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">modifier</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">modifiers</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">stages</span> = append(<span style="color:#a6e22e">stages</span>, <span style="color:#a6e22e">getStage</span>(<span style="color:#a6e22e">modifier</span>))
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">stages</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">getStage</span>(<span style="color:#a6e22e">mod</span> <span style="color:#a6e22e">modifier</span>) <span style="color:#a6e22e">stage</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">func</span>(<span style="color:#a6e22e">input</span> <span style="color:#a6e22e">pipe</span>) <span style="color:#a6e22e">pipe</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">output</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">int</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">go</span> <span style="color:#a6e22e">send</span>(<span style="color:#a6e22e">output</span>, <span style="color:#a6e22e">input</span>, <span style="color:#a6e22e">mod</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">output</span>
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>So, when we want to run the pipeline we only need to deploy the stages in the same order as we specified them and then consume the data stream at each stage:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">pip</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">Pipeline</span>) <span style="color:#a6e22e">Exec</span>(<span style="color:#a6e22e">input</span> <span style="color:#f92672">...</span><span style="color:#66d9ef">int</span>) []<span style="color:#66d9ef">int</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">lastStageIndex</span> <span style="color:#f92672">:=</span> len(<span style="color:#a6e22e">pip</span>.<span style="color:#a6e22e">stages</span>) <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">start</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">pip</span>.<span style="color:#a6e22e">source</span>(<span style="color:#a6e22e">input</span><span style="color:#f92672">...</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">result</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">pip</span>.<span style="color:#a6e22e">stages</span>[<span style="color:#ae81ff">0</span>](<span style="color:#a6e22e">start</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">1</span>; <span style="color:#a6e22e">i</span> &lt; <span style="color:#a6e22e">lastStageIndex</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">result</span> = <span style="color:#a6e22e">pip</span>.<span style="color:#a6e22e">stages</span>[<span style="color:#a6e22e">i</span>](<span style="color:#a6e22e">result</span>)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">lastStageIndex</span> <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span> { <span style="color:#75715e">// if it&#39;s a single stage we don&#39;t want to remake the last stage (as it&#39;s also the first again)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">pip</span>.<span style="color:#a6e22e">end</span>(<span style="color:#a6e22e">result</span>)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">pip</span>.<span style="color:#a6e22e">end</span>(<span style="color:#a6e22e">pip</span>.<span style="color:#a6e22e">stages</span>[<span style="color:#a6e22e">lastStageIndex</span>](<span style="color:#a6e22e">result</span>))
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>The call is cleaner than the previous ones, as you can see:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">number</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">NewPipeline</span>(<span style="color:#a6e22e">start</span>, <span style="color:#a6e22e">final</span>, <span style="color:#a6e22e">add2</span>, <span style="color:#a6e22e">square</span>, <span style="color:#a6e22e">add2</span>).<span style="color:#a6e22e">Exec</span>(<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">4</span>, <span style="color:#ae81ff">5</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#a6e22e">number</span>)
+</span></span><span style="display:flex;"><span>    }
+</span></span></code></pre></div><h5 id="4-the-flow-lasts-a-bit-longer">4. The flow lasts a bit longer&hellip;</h5>
 <p>There&rsquo;s a ton of features to think about this refactor. A simple TODO list would be:</p>
 <ul>
 <li>fan in/out</li>

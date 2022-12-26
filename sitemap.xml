@@ -1,53 +1,39 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
-  
   <url>
+    <loc>https://pabloos.github.io/backend/</loc>
+    <lastmod>2022-11-20T17:23:59+01:00</lastmod>
+  </url><url>
+    <loc>https://pabloos.github.io/</loc>
+    <lastmod>2022-11-20T17:23:59+01:00</lastmod>
+  </url><url>
+    <loc>https://pabloos.github.io/backend/middleware/</loc>
+    <lastmod>2022-11-20T17:23:59+01:00</lastmod>
+  </url><url>
     <loc>https://pabloos.github.io/languages/one2one/</loc>
     <lastmod>2021-01-16T21:42:37+01:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://pabloos.github.io/</loc>
-    <lastmod>2021-01-16T21:42:37+01:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://pabloos.github.io/languages/</loc>
     <lastmod>2021-01-16T21:42:37+01:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://pabloos.github.io/languages/usegointerfaces/</loc>
     <lastmod>2020-06-28T12:43:10+02:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://pabloos.github.io/concurrency/</loc>
     <lastmod>2020-04-09T13:20:57+02:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://pabloos.github.io/concurrency/pipelines/</loc>
     <lastmod>2020-04-09T13:20:57+02:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://pabloos.github.io/testing/e2e-with-jest-and-puppeteer.-how-i-do-it/</loc>
     <lastmod>2020-04-09T12:03:21+02:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://pabloos.github.io/testing/</loc>
     <lastmod>2020-04-09T12:03:21+02:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://pabloos.github.io/categories/</loc>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://pabloos.github.io/tags/</loc>
   </url>
-  
 </urlset>
