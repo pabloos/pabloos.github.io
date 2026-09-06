@@ -1,0 +1,3 @@
+[submodule "themes/parchment"]
+	path = themes/parchment
+	url = https://github.com/jsonfry/parchment.git

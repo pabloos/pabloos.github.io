@@ -1,0 +1,33 @@
+base_url = "https://pabloos.github.io"
+title = "bytecora"
+description = "Composing software"
+default_language = "en"
+theme = "parchment"
+
+compile_sass = false
+build_search_index = false
+generate_feeds = true
+feed_filenames = ["index.xml"]
+
+[markdown.highlighting]
+style = "class"
+light_theme = "solarized-light"
+dark_theme = "solarized-dark"
+add_color_scheme = true
+
+[extra]
+head_title = "bytecora, by Pablo Cumpián Díaz"
+
+[[extra.footer_menu]]
+  [[extra.footer_menu.links]]
+    text = "github"
+    href = "https://github.com/pabloos"
+  [[extra.footer_menu.links]]
+    text = "linkedin"
+    href = "https://www.linkedin.com/in/pablocdiaz"
+  [[extra.footer_menu.links]]
+    text = "email"
+    href = "mailto:pablocumpia@gmail.com"
+  [[extra.footer_menu.links]]
+    text = "rss"
+    href = "/index.xml"

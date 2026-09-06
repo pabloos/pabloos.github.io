@@ -1,0 +1,42 @@
+{% extends "parchment/templates/index.html" %}
+
+{% block head %}
+  {{ super() }}
+  <link rel="icon" type="image/png" href="{{ get_url(path='favicon.png') }}" />
+  <link rel="apple-touch-icon" sizes="144x144"
+        href="{{ get_url(path='apple-touch-icon-144-precomposed.png') }}" />
+  <link rel="stylesheet" href="{{ get_url(path='giallo-light.css') }}" />
+  <link rel="stylesheet" href="{{ get_url(path='giallo-dark.css') }}"
+        media="(prefers-color-scheme: dark)" />
+{% endblock head %}
+
+{% block rss %}
+  <link rel="alternate" type="application/rss+xml" title="RSS"
+        href="{{ get_url(path='index.xml', trailing_slash=false) }}" />
+{% endblock rss %}
+
+{% block content %}
+  {% if section.content %}
+    <article>{{ section.content | safe }}</article>
+  {% endif %}
+
+  {% set_global posts = [] %}
+  {% for s in section.subsections %}
+    {% set sec = get_section(path=s) %}
+    {% set_global posts = [...posts, ...sec.pages] %}
+  {% endfor %}
+
+  {% if posts %}
+    <nav aria-label="Archive list">
+      <h2 class="archive">posts</h2>
+      <ul class="archive">
+        {% for post in posts | sort(attribute="date") | reverse %}
+          <li>
+            <time datetime="{{ post.date }}">{{ post.date | date(format="%d %b %Y") }}</time>
+            <a href="{{ post.permalink }}">{{ post.title }}</a>
+          </li>
+        {% endfor %}
+      </ul>
+    </nav>
+  {% endif %}
+{% endblock content %}
