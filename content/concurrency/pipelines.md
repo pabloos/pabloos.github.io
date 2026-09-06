@@ -8,7 +8,7 @@ aliases = ["/golang/pipelines/"]
 
 All the code used here is on my github: [pabloos](https://github.com/pabloos/my-go-pipeline-pattern). Keep an eye on it, for clarity I will not reference all the functions. Each section has his own branch.
 
-##### 1. Original Sketch
+### 1. Original Sketch
 
 A pipeline is not unlike an assembly line: a queue of jobs that transform an input and sends it to the next stage. In Go an obvious implementation would be based on channels ([originally based on an idea in the oficial blog](https://blog.golang.org/pipelines)), in which each function represents a separate stage connected with the next one using a channel.
 
@@ -101,7 +101,7 @@ func main() {
 }
 ```
 
-##### 2. A refactor proposal
+### 2. A refactor proposal
 
 There are some obvious improvements to the code above:
 
@@ -140,7 +140,7 @@ type modifier func(int) int
 
 Decoupling all these things brings us the chance to test easily. That's for unit testing... but what about to see the pattern as a structure to check with integration tests?
 
-##### 3. Pattern as an object. Autogenerate the stages
+### 3. Pattern as an object. Autogenerate the stages
 
 We could present all the elemets as a struct:
 
@@ -222,7 +222,7 @@ The call is cleaner than the previous ones, as you can see:
     }
 ```
 
-##### 4. The flow lasts a bit longer...
+### 4. The flow lasts a bit longer...
 
 There's a ton of features to think about this refactor. A simple TODO list would be:
 

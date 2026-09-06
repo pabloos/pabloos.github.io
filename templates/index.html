@@ -8,6 +8,10 @@
   <link rel="stylesheet" href="{{ get_url(path='giallo-light.css') }}" />
   <link rel="stylesheet" href="{{ get_url(path='giallo-dark.css') }}"
         media="(prefers-color-scheme: dark)" />
+  <style>
+    /* la tabla ancha de "Use Go interfaces" no debe romper el layout en móvil */
+    main table { display: block; overflow-x: auto; }
+  </style>
 {% endblock head %}
 
 {% block rss %}
@@ -28,15 +32,22 @@
 
   {% if posts %}
     <nav aria-label="Archive list">
-      <h2 class="archive">posts</h2>
-      <ul class="archive">
-        {% for post in posts | sort(attribute="date") | reverse %}
-          <li>
-            <time datetime="{{ post.date }}">{{ post.date | date(format="%d %b %Y") }}</time>
-            <a href="{{ post.permalink }}">{{ post.title }}</a>
-          </li>
-        {% endfor %}
-      </ul>
+      {% set map = posts | group_by(attribute="year") %}
+      {% set_global years = [] %}
+      {% for year, ignored in map %}
+        {% set_global years = [...years, year] %}
+      {% endfor %}
+      {% for year in years | sort | reverse %}
+        <h2 class="archive">{{ year }}</h2>
+        <ul class="archive">
+          {% for post in map[year] | sort(attribute="date") | reverse %}
+            <li>
+              <time datetime="{{ post.date }}">{{ post.date | date(format="%d %b") }}</time>
+              <a href="{{ post.permalink }}">{{ post.title }}</a>
+            </li>
+          {% endfor %}
+        </ul>
+      {% endfor %}
     </nav>
   {% endif %}
 {% endblock content %}
