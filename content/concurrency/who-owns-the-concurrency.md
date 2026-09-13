@@ -123,51 +123,7 @@ One detail in the diagram is easy to miss and it is not an accident: the consume
 
 None of this is worth much as an assertion. And the reason the 2020 post never caught its own problem is sitting in its last code listing: it ran `Exec(1, 2, 3, 4, 5)` over three arithmetic stages. Five integers, no failures, no skew, no reason to care about order — an example with nothing in it that could push back.
 
-So here is one with teeth: 20,000 event lines to parse, enrich and score, where **one line in seven costs twelve times as much as the rest**, because that is what real batches look like. The enrichment is actual CPU work, not a `sleep`:
-
-```go
-func parse(l string) (event, error) {
-    parts := strings.Split(l, "|")
-    if len(parts) != 4 {
-        return event{}, fmt.Errorf("malformed line: %q", l)
-    }
-    id, err := strconv.Atoi(parts[0])
-    if err != nil {
-        return event{}, fmt.Errorf("bad id in %q: %w", l, err)
-    }
-    return event{id: id, user: parts[1], kind: parts[2], payload: parts[3]}, nil
-}
-
-func enrich(e event) event {
-    h := sha256.Sum256([]byte(e.payload))
-    for i := 0; i < costOf(e.id); i++ { // skewed: every 7th is 12x
-        h = sha256.Sum256(h[:])
-    }
-    e.payload = fmt.Sprintf("%x", h[:4])
-    return e
-}
-
-stages := flow.Then(flow.TryMap(parse), flow.Then(flow.Map(enrich), flow.Map(score)))
-```
-
-Median of nine runs, eight cores:
-
-| | wall time | speedup | order kept |
-|---|---:|---:|:---:|
-| `Workers(1)` | 1558 ms | — | yes |
-| `Workers(2)` | 924 ms | 1.7× | no |
-| `Workers(4)` | 549 ms | 2.8× | no |
-| `Workers(8)` | 439 ms | 3.5× | no |
-| `Workers(16)` | 403 ms | 3.9× | no |
-| `Workers(8)` + `Ordered()` | 395 ms | 3.9× | yes |
-
-**3.5× on eight cores, not 8×.** Sublinear, and I would be suspicious of a pipeline library that claimed otherwise on a workload with this much skew: the batch cannot finish before its most expensive item does. Doubling to sixteen workers then buys nothing measurable — the curve has already flattened at the core count.
-
-### The knob is not about your cores
-
-That last sentence is true of this workload and misleading as a general rule, which I only noticed because someone pushed back on the benchmark. Hashing in a loop measures *parallelism*, and parallelism is capped by the machine. Most pipelines in a backend are not doing that. They are waiting — on a query, on another service, on a disk — and a goroutine parked on a socket is not using a core at all.
-
-So: same pipeline shape, same eight cores, but now the expensive stage is an HTTP call against a local server that takes 10 ms to answer.
+So here is one with teeth, and it is the kind of stage a backend actually has: most pipelines there are not computing, they are waiting — on a query, on another service, on a disk. The expensive stage below is an HTTP call to a local server that takes 10 ms to answer each request:
 
 ```go
 fetch := flow.ProcessorFunc[string, profile](
@@ -190,44 +146,50 @@ fetch := flow.ProcessorFunc[string, profile](
     })
 ```
 
-600 requests, so six seconds if you make them one at a time:
+600 requests, so six seconds if you make them one at a time. Eight cores, median of five runs:
 
 | | wall time | speedup | concurrent requests seen by the server |
 |---|---:|---:|---:|
-| `Workers(1)` | 6784 ms | — | 1 |
-| `Workers(8)` | 854 ms | 7.9× | 8 |
-| `Workers(32)` | 220 ms | 30.8× | 32 |
-| `Workers(64)` | 115 ms | 59.0× | 64 |
-| `Workers(256)` | 35 ms | 191.7× | 256 |
+| `Workers(1)` | 6982 ms | — | 1 |
+| `Workers(8)` | 846 ms | 8.3× | 8 |
+| `Workers(32)` | 217 ms | 32.1× | 32 |
+| `Workers(64)` | 113 ms | 61.8× | 64 |
+| `Workers(128)` | 58 ms | 119.6× | 128 |
+| `Workers(256)` | 37 ms | 187.8× | 256 |
 
-Near-linear to 256 workers on eight cores, and the last column is the part I would frame: the concurrency the *server* observed tracked `Workers(n)` exactly, every time. The knob does precisely what it says, and its right value has nothing to do with your hardware. On the CPU workload the best setting was eight and you could have guessed it from `nproc`. Here the best setting is however many requests you are willing to have in flight — and that ceiling belongs to the service you are calling, not to you. It is the same argument in the same position; only the number that makes sense has changed.
+Near-linear to 256 workers on eight cores, and the last column is the part I would frame: the concurrency the *server* observed tracked `Workers(n)` exactly, every time. The knob does precisely what it says.
 
-Which is the practical reason to want the concurrency owned by the runtime rather than baked into the stages. Both of these pipelines are the same three `Processor`s. Nothing in them knows whether it is hashing or waiting on a socket, and nothing had to be rewritten to go from 3.5× to 192×.
+What it does not do is tell you the right number, and that number has nothing to do with your hardware. The same pipeline doing CPU work instead — hashing in a loop — tops out at 3.5× on these eight cores, and workers past eight buy nothing, because parked goroutines are free and computing ones are not. For CPU work you could read the right setting off `nproc`. Here it is however many requests you are willing to have in flight, and that ceiling belongs to the service you are calling, not to you.
+
+Which is the practical case for the concurrency being owned by the runtime. Nothing in those `Processor`s knows whether it is hashing or waiting on a socket, and nothing had to be rewritten to go from 3.5× to 188×.
 
 (The caveat, since this is a synthetic backend: my test server has no connection limit and no saturation point, so it scales as far as I push it. A real one answers 256 concurrent requests by getting slower, or by rate-limiting you. The knob has a right value out there; it is just not one you can read off a spec sheet.)
 
-Back to the CPU-bound run for the other two findings.
+### What it costs, and how it stops
 
-**`Ordered()` costs no measurable time here**, which surprised me enough to go looking for where the bill was. It is memory, and only when the stream is unlucky. Moving the skew so that the *first* event is the slow one, and sampling the heap while it runs:
+**Ordering costs memory, not time — and only what leaves the pipeline.** To make order expensive, the first of 3,000 requests takes 1.5 seconds while the rest take 10 ms, and each response is a 4 KB profile. Sixty-four workers, heap sampled while it runs:
 
 | | wall time | peak heap |
 |---|---:|---:|
-| `Workers(8)` | 341 ms | 6.9 MB |
-| `Workers(8)` + `Ordered()` | 331 ms | 9.9 MB |
+| `Workers(64)` | 1501 ms | 7.1 MB |
+| `Workers(64)` + `Ordered()` | 1502 ms | 25.0 MB |
 
-Same wall time, about 1.4× the peak heap. That is exactly the shape you would predict: the collector cannot deliver item 2 until item 1 has arrived, so everything produced while the straggler is still running piles up in a map. Ordering is a buffer, and the buffer grows to fit the worst item in the batch. On an endless stream rather than a batch, that is the number to watch.
+Same wall time, three and a half times the peak heap. The collector cannot deliver the second result until the first has arrived, so everything that finishes while the slow request is still out piles up in a map: here, nearly 3,000 profiles. Ordering is a buffer, and the buffer grows to fit the worst item in the batch.
 
-**Failure stops the batch.** Corrupting one line halfway through the input:
+The detail that took me a second run to see: my first attempt added a last stage that reduced each profile to a short `"user:score"` label, and the difference vanished — 7.4 MB against 7.6. The collector only ever holds *outputs*. What ordering costs is decided by what comes out of the pipeline, not by what went through it, which is a good reason to shrink results before the end rather than after.
+
+**A failure stops the batch.** The server returns a 500 for request 1,500 of 3,000:
 
 ```
-err = malformed line: "esto-no-es-una-linea"
-consumed before stopping = 9997 of 20000
-198 ms, against 439 ms for the full run
+err = GET http://127.0.0.1:50417/profile?id=1500: 500 Internal Server Error
+consumed = 1506 · requests aborted in flight = 12 · 276 ms
 ```
 
-The error came back from `Run` intact, the run ended in under half the time, and nothing downstream ever saw a half-parsed event. Cancelling from outside behaves the same way: a 120 ms deadline stopped the run at 120 ms with 5,516 of 20,000 consumed, `context.DeadlineExceeded` came back from `Run`, and no goroutines were left behind.
+The error comes back from `Run` intact, roughly half the batch was never sent at all, and the twelve requests already on the wire were aborted rather than left to finish. That last part is not something `flow` does: it is the `ctx` passed into `NewRequestWithContext`, cancelled by the runtime the moment the first error landed.
 
-That last one is only true as of this week. Until I ran this, `Run` returned `nil` on a cancelled context — a truncated run was indistinguishable from a finished one, and the toy example could never have shown it, because a toy example is never still running when somebody cancels. Handing the user a rule to follow ("your consumer must be thread-safe") would have been the lazy version.
+**So does a deadline.** A 100 ms timeout on the same 3,000 requests stopped the run at 102 ms, with 512 consumed, 60 requests aborted in flight, and `context.DeadlineExceeded` back from `Run`.
+
+That last result is only true as of this week. Until I ran this, `Run` returned `nil` on a cancelled context — a truncated run was indistinguishable from a finished one, and the toy example could never have shown it, because a toy example is never still running when somebody cancels.
 
 ### The list, finally
 
