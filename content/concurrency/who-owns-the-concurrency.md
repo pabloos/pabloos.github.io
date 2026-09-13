@@ -108,7 +108,7 @@ In 2020, adding a stage added a unit of concurrency whether you wanted one or no
 
 ```go
 err := flow.Run(ctx,
-    flow.Slice(1, 2, 3, 4),
+    flow.Slice(lines...),
     flow.Then(parse, flow.Then(enrich, score)),
     flow.Into(&out),
     flow.Workers(8),
@@ -117,18 +117,79 @@ err := flow.Run(ctx,
 
 Eight workers, each running the entire composed chain end to end, all pulling from one input channel. The stage count is about what you are computing; the worker count is about how much machine you want to spend on it. Compare that to Monday's question — *where would a second copy of the slow stage go?* — which now has a boring answer: nowhere, you just raise the number.
 
-One detail in the diagram is easy to miss and it is not an accident: the consumer sits behind a single collector goroutine. `Into(&out)` appends to a slice with no mutex, and that is safe by construction rather than by luck. Handing the user a rule to follow ("your consumer must be thread-safe") would have been the lazy version.
+One detail in the diagram is easy to miss and it is not an accident: the consumer sits behind a single collector goroutine. `Into(&out)` appends to a slice with no mutex, and that is safe by construction rather than by luck.
+
+### Under load, where the old example never went
+
+None of this is worth much as an assertion. And the reason the 2020 post never caught its own problem is sitting in its last code listing: it ran `Exec(1, 2, 3, 4, 5)` over three arithmetic stages. Five integers, no failures, no skew, no reason to care about order — an example with nothing in it that could push back.
+
+So here is one with teeth: 20,000 event lines to parse, enrich and score, where **one line in seven costs twelve times as much as the rest**, because that is what real batches look like. The enrichment is actual CPU work, not a `sleep`:
+
+```go
+func parse(l string) (event, error) {
+    parts := strings.Split(l, "|")
+    if len(parts) != 4 {
+        return event{}, fmt.Errorf("malformed line: %q", l)
+    }
+    id, err := strconv.Atoi(parts[0])
+    if err != nil {
+        return event{}, fmt.Errorf("bad id in %q: %w", l, err)
+    }
+    return event{id: id, user: parts[1], kind: parts[2], payload: parts[3]}, nil
+}
+
+func enrich(e event) event {
+    h := sha256.Sum256([]byte(e.payload))
+    for i := 0; i < costOf(e.id); i++ { // skewed: every 7th is 12x
+        h = sha256.Sum256(h[:])
+    }
+    e.payload = fmt.Sprintf("%x", h[:4])
+    return e
+}
+
+stages := flow.Then(flow.TryMap(parse), flow.Then(flow.Map(enrich), flow.Map(score)))
+```
+
+Median of nine runs, eight cores:
+
+| | wall time | speedup | order kept |
+|---|---:|---:|:---:|
+| `Workers(1)` | 1558 ms | — | yes |
+| `Workers(2)` | 924 ms | 1.7× | no |
+| `Workers(4)` | 549 ms | 2.8× | no |
+| `Workers(8)` | 439 ms | 3.5× | no |
+| `Workers(16)` | 403 ms | 3.9× | no |
+| `Workers(8)` + `Ordered()` | 395 ms | 3.9× | yes |
+
+Three things in that table are worth more than the headline number.
+
+**3.5× on eight cores, not 8×.** Sublinear, and I would be suspicious of a pipeline library that claimed otherwise on a workload with this much skew: the batch cannot finish before its most expensive item does. Doubling to sixteen workers then buys nothing measurable — the curve has already flattened at the core count, and the library will happily let you set a number that does not help.
+
+**`Ordered()` costs no measurable time here**, which surprised me enough to go looking for where the bill was. It is memory, and only when the stream is unlucky. Moving the skew so that the *first* event is the slow one, and sampling the heap while it runs:
+
+| | wall time | peak heap |
+|---|---:|---:|
+| `Workers(8)` | 341 ms | 6.9 MB |
+| `Workers(8)` + `Ordered()` | 331 ms | 9.9 MB |
+
+Same wall time, about 1.4× the peak heap. That is exactly the shape you would predict: the collector cannot deliver item 2 until item 1 has arrived, so everything produced while the straggler is still running piles up in a map. Ordering is a buffer, and the buffer grows to fit the worst item in the batch. On an endless stream rather than a batch, that is the number to watch.
+
+**Failure stops the batch.** Corrupting one line halfway through the input:
+
+```
+err = malformed line: "esto-no-es-una-linea"
+consumed before stopping = 9997 of 20000
+198 ms, against 439 ms for the full run
+```
+
+The error came back from `Run` intact, the run ended in under half the time, and nothing downstream ever saw a half-parsed event. Cancelling from outside behaves the same way: a 120 ms deadline stopped the run at 120 ms with 5,516 of 20,000 consumed, `context.DeadlineExceeded` came back from `Run`, and no goroutines were left behind.
+
+That last one is only true as of this week. Until I ran this, `Run` returned `nil` on a cancelled context — a truncated run was indistinguishable from a finished one, and the toy example could never have shown it, because a toy example is never still running when somebody cancels. Handing the user a rule to follow ("your consumer must be thread-safe") would have been the lazy version.
 
 ### The list, finally
 
-Four items, all of them consequences rather than features:
+Every item on it turned into a consequence rather than a feature. Errors come back because each end returns one, and a `sync.Once` keeps the first and cancels the rest. Cancellation works because every send in the runtime sits in a `select` against `ctx.Done()` — where the 2020 version had no way to stop at all, and leaked the goroutines of anyone still blocked on a send. Buffering is `Prefetch(n)`, defaulting to zero, which is precisely the lock-step the old unbuffered channels gave you; the behaviour did not change, only the fact that it is now a named knob rather than a `make(chan int)` repeated in four places.
 
-**Errors.** Every end returns an `error`, so the first one to fail wins: a `sync.Once` stores it and cancels everything else. Fail-fast is not something I added — it is what you get once there is somewhere to return an error from.
-
-**Cancellation.** Every send in the runtime sits in a `select` against `ctx.Done()`. The 2020 version had no way to stop: if the consumer walked away, the producer blocked on a send forever and every goroutine behind it leaked.
-
-**Buffers.** `Prefetch(n)` sets how many items may queue ahead of the pool. The default is zero — strict lock-step, exactly what the old unbuffered channels did. The behaviour did not change; what changed is that it stopped being `make(chan int)` repeated in four places and became one knob with a name.
-
-**Ordering**, which was not on the list, and cost the most of the four. In 2020 it was free, because there was only ever one value in a stage: output order was input order by construction. Put eight workers on one channel and outputs finish whenever they finish. Getting the original order back costs real memory, and it is opt-in — `Ordered()` — because plenty of pipelines do not care and the ones that do should know what they are paying. That one needs its own post, and it gets one next week.
+And ordering, which was never on the list, turned out to be the one with a real price tag and gets its own post next week.
 
 Six years, and the change was one sentence. Not *how do I arrange the stages*, which is what the old post spent its length on and answered reasonably well. **Who owns the concurrency** — and once the answer stopped being "each stage, permanently, decided at the moment you write it", four things that had been rewrites became four arguments you pass.
