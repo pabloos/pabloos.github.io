@@ -10,7 +10,13 @@
         media="(prefers-color-scheme: dark)" />
   <style>
     /* la tabla ancha de "Use Go interfaces" no debe romper el layout en móvil */
-    main table { display: block; overflow-x: auto; }
+    main table { display: block; overflow-x: auto; margin: 1.5rem 0; }
+    /* el reset del tema deja th y td sin padding: las cabeceras quedan pegadas */
+    main th, main td { padding: 0.3rem 0.9rem; vertical-align: top; }
+    main th:first-child, main td:first-child { padding-left: 0; }
+    main th:last-child, main td:last-child { padding-right: 0; }
+    main thead th { border-bottom: 1px solid var(--secondary); font-weight: 600; }
+    main td { font-variant-numeric: tabular-nums; }
   </style>
 {% endblock head %}
 
