@@ -161,9 +161,52 @@ Median of nine runs, eight cores:
 | `Workers(16)` | 403 ms | 3.9× | no |
 | `Workers(8)` + `Ordered()` | 395 ms | 3.9× | yes |
 
-Three things in that table are worth more than the headline number.
+**3.5× on eight cores, not 8×.** Sublinear, and I would be suspicious of a pipeline library that claimed otherwise on a workload with this much skew: the batch cannot finish before its most expensive item does. Doubling to sixteen workers then buys nothing measurable — the curve has already flattened at the core count.
 
-**3.5× on eight cores, not 8×.** Sublinear, and I would be suspicious of a pipeline library that claimed otherwise on a workload with this much skew: the batch cannot finish before its most expensive item does. Doubling to sixteen workers then buys nothing measurable — the curve has already flattened at the core count, and the library will happily let you set a number that does not help.
+### The knob is not about your cores
+
+That last sentence is true of this workload and misleading as a general rule, which I only noticed because someone pushed back on the benchmark. Hashing in a loop measures *parallelism*, and parallelism is capped by the machine. Most pipelines in a backend are not doing that. They are waiting — on a query, on another service, on a disk — and a goroutine parked on a socket is not using a core at all.
+
+So: same pipeline shape, same eight cores, but now the expensive stage is an HTTP call against a local server that takes 10 ms to answer.
+
+```go
+fetch := flow.ProcessorFunc[string, profile](
+    func(ctx context.Context, url string, emit func(profile) error) error {
+        req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+        if err != nil {
+            return err
+        }
+        resp, err := client.Do(req)
+        if err != nil {
+            return err
+        }
+        defer resp.Body.Close()
+
+        var p profile
+        if err := json.NewDecoder(resp.Body).Decode(&p); err != nil {
+            return err
+        }
+        return emit(p)
+    })
+```
+
+600 requests, so six seconds if you make them one at a time:
+
+| | wall time | speedup | concurrent requests seen by the server |
+|---|---:|---:|---:|
+| `Workers(1)` | 6784 ms | — | 1 |
+| `Workers(8)` | 854 ms | 7.9× | 8 |
+| `Workers(32)` | 220 ms | 30.8× | 32 |
+| `Workers(64)` | 115 ms | 59.0× | 64 |
+| `Workers(256)` | 35 ms | 191.7× | 256 |
+
+Near-linear to 256 workers on eight cores, and the last column is the part I would frame: the concurrency the *server* observed tracked `Workers(n)` exactly, every time. The knob does precisely what it says, and its right value has nothing to do with your hardware. On the CPU workload the best setting was eight and you could have guessed it from `nproc`. Here the best setting is however many requests you are willing to have in flight — and that ceiling belongs to the service you are calling, not to you. It is the same argument in the same position; only the number that makes sense has changed.
+
+Which is the practical reason to want the concurrency owned by the runtime rather than baked into the stages. Both of these pipelines are the same three `Processor`s. Nothing in them knows whether it is hashing or waiting on a socket, and nothing had to be rewritten to go from 3.5× to 192×.
+
+(The caveat, since this is a synthetic backend: my test server has no connection limit and no saturation point, so it scales as far as I push it. A real one answers 256 concurrent requests by getting slower, or by rate-limiting you. The knob has a right value out there; it is just not one you can read off a spec sheet.)
+
+Back to the CPU-bound run for the other two findings.
 
 **`Ordered()` costs no measurable time here**, which surprised me enough to go looking for where the bill was. It is memory, and only when the stream is unlucky. Moving the skew so that the *first* event is the slow one, and sampling the heap while it runs:
 
