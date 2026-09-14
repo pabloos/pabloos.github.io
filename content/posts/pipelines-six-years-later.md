@@ -1,7 +1,11 @@
 +++
 title = "Pipelines, six years later"
+description = "A pipeline I wrote in 2020 ended with a TODO list that never got done. Generics were only half of the reason."
 date = 2026-09-14
 aliases = ["/concurrency/pipelines-six-years-later/"]
+
+[extra]
+image = "og/pipelines-six-years-later.png"
 +++
 
 Six years ago I wrote [Pipelines](/posts/pipelines/). The idea wasn't mine; I took it from [Go Concurrency Patterns: Pipelines and cancellation](https://go.dev/blog/pipelines), Sameer Ajmani's 2014 article. What I was trying to add was standardisation: take something everyone was hand-rolling and turn it into a thing you could reuse instead of rebuilding it each time. That's why the post works its way toward a type per concept, an injected transformation, generated stages, and finally a `Pipeline` struct with an `Exec` method. I wanted to turn it into a library.

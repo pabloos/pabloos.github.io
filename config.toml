@@ -17,6 +17,7 @@ add_color_scheme = true
 
 [extra]
 head_title = "bytecora, by Pablo Cumpián Díaz"
+og_image = "og/default.png"
 
 [[extra.footer_menu]]
   [[extra.footer_menu.links]]

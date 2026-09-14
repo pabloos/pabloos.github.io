@@ -8,6 +8,25 @@
   <link rel="stylesheet" href="{{ get_url(path='giallo-light.css') }}" />
   <link rel="stylesheet" href="{{ get_url(path='giallo-dark.css') }}"
         media="(prefers-color-scheme: dark)" />
+  {# Open Graph: LinkedIn y compañía no miran el contenido, solo estas
+     etiquetas. Cada post puede fijar description y extra.image (PNG de
+     1200x627 en static/og/); si no, se usa la imagen por defecto. #}
+  {% if page is defined %}
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="{{ page.title }}" />
+  <meta property="og:url" content="{{ page.permalink }}" />
+  <meta property="og:description" content="{% if page.description %}{{ page.description }}{% else %}{{ config.description }}{% endif %}" />
+  <meta property="og:image" content="{% if page.extra.image %}{{ get_url(path=page.extra.image) }}{% else %}{{ get_url(path=config.extra.og_image) }}{% endif %}" />
+  {% else %}
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="{{ config.title }}" />
+  <meta property="og:url" content="{{ config.base_url }}" />
+  <meta property="og:description" content="{{ config.description }}" />
+  <meta property="og:image" content="{{ get_url(path=config.extra.og_image) }}" />
+  {% endif %}
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="627" />
+  <meta name="twitter:card" content="summary_large_image" />
   <style>
     /* la tabla ancha de "Use Go interfaces" no debe romper el layout en móvil */
     main table { display: block; overflow-x: auto; margin: 1.5rem 0; }

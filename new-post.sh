@@ -29,14 +29,20 @@ fi
 cat > "$fichero" <<FRONTMATTER
 +++
 title = "$titulo"
+description = ""
 date = $(date +%Y-%m-%d)
 draft = true
+
+[extra]
+# vista previa en LinkedIn: PNG de 1200x627 en static/og/
+image = "og/$slug.png"
 +++
 
 FRONTMATTER
 
 echo "$fichero"
 echo "Sigue en borrador: quita 'draft = true' el día que salga."
+echo "Antes de publicar: rellena 'description' y crea static/og/$slug.png (1200x627)."
 if [ -n "${EDITOR:-}" ]; then
   "$EDITOR" "$fichero"
 fi
