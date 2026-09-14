@@ -1,7 +1,6 @@
 +++
 title = "Pipelines, six years later"
 date = 2026-09-14
-draft = true
 +++
 
 Six years ago I wrote [Pipelines](/concurrency/pipelines/). The shape in it was not mine — I took it from [Go Concurrency Patterns: Pipelines and cancellation](https://go.dev/blog/pipelines), Sameer Ajmani's 2014 article. What I was trying to add was standardisation: take something everyone was hand-rolling and turn it into a thing you could reuse instead of rebuilding it each time. That is why the post works its way toward a type per concept, an injected transformation, generated stages, and finally a `Pipeline` struct with an `Exec` method. It was a library trying to get out.
