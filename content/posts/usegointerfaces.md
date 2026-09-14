@@ -2,6 +2,7 @@
 title = "Use Go interfaces"
 date = 2020-06-28T12:43:10+02:00
 slug = "usegointerfaces"
+aliases = ["/languages/usegointerfaces/"]
 +++
 
 tl;dr:

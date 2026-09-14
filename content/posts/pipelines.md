@@ -1,7 +1,7 @@
 +++
 title = "Pipelines"
 date = 2020-04-09T13:20:57+02:00
-aliases = ["/golang/pipelines/"]
+aliases = ["/golang/pipelines/", "/concurrency/pipelines/"]
 +++
 
 ![pipelines](/pipelines.png)

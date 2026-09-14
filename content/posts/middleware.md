@@ -1,11 +1,12 @@
 +++
 title = "Semantic middlewares"
 date = 2022-11-20T17:23:59+01:00
+aliases = ["/backend/middleware/"]
 +++
 
 ### Piping the request
 
-The middleware pattern is an ubiquitous software concept that help us to decoulpe a request process in stages the same way [pipeline pattern](https://pabloos.github.io/concurrency/pipelines/) does. His monoidal nature grants ease of composition, which allow us to reuse any of these stages with other proceses. Moreover, this behaviour arises a declarative way to define our service architecture in semantic terms.
+The middleware pattern is an ubiquitous software concept that help us to decoulpe a request process in stages the same way [pipeline pattern](/posts/pipelines/) does. His monoidal nature grants ease of composition, which allow us to reuse any of these stages with other proceses. Moreover, this behaviour arises a declarative way to define our service architecture in semantic terms.
 
 This post will cover the foundations of this mechanism in the HTTP ecosystem, providing some uses to atomize our handlers, and finally showing up the benefits of this approach to define our architecture.
 

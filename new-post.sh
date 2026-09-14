@@ -2,7 +2,7 @@
 # Arranca el post del día en borrador.
 #   ./new-post.sh <sección> <slug> "<título>"
 # Ejemplo:
-#   ./new-post.sh concurrency ordered-fan-out "Ordered fan-out"
+#   ./new-post.sh posts ordered-fan-out "Ordered fan-out"
 set -euo pipefail
 
 if [ $# -ne 3 ]; then
