@@ -17,7 +17,7 @@ Because of its simple and concise syntax, Go is a good language to draft some of
 His most common implementation is based on the [Handler interface in the standard library](https://pkg.go.dev/net/http#Handler). In that sense, a middleware is just a closure that links handlers:
 
 ```go
-import _ "net/http"
+import . "net/http"
 
 type Middleware func(Handler) Handler
 
@@ -30,17 +30,20 @@ func Nop(next Handler) Handler {
 }
 ```
 
-Because of our needs, we're going to popule it with some dependencies. To make it possible middlewares can be built through objects or closures. As I said in a [previous post](http://localhost:1313/languages/one2one/), I prefer the last one in order to embrace a more functional fashion. That's it: a closure that closes a closure:
+Because of our needs, we're going to popule it with some dependencies. To make it possible middlewares can be built through objects or closures. I prefer the last one in order to embrace a more functional fashion. That's it: a closure that closes a closure:
 
 ```go
-func Auth(authz infra.Authz) mux.MiddlewareFunc {
-	auth.Init()
-
+func Auth(authz infra.Authz) Middleware {
 	return func(next Handler) Handler {
 		return HandlerFunc(func(res ResponseWriter, req *Request) {
-			jwt := req.Headers().Get("Authorization")
-			
-			authz.Check(jwt)
+			jwt := req.Header.Get("Authorization")
+
+			if err := authz.Check(jwt); err != nil {
+				Error(res, err.Error(), StatusUnauthorized)
+				return
+			}
+
+			next.ServeHTTP(res, req)
 		})
 	}
 }
@@ -61,7 +64,7 @@ func injector(next Handler) Handler {
 
 func receiver(next Handler) Handler {
     return HandlerFunc(func(res ResponseWriter, req *Request) {
-		number := GetNumber(ctx)
+		number := getNumber(req.Context())
 
 		// ...
 	})
@@ -156,11 +159,11 @@ There's so many routing libraries out there, but they all work similary. Here's 
 ```go
 router := mux.NewRouter()
 
-handler := chain(auth,validate,bind)(format)
+handler := Chain(auth, validate, bind)(format)
 
 router.Handle("/gifts/{id}", handler)
 
-http.Handle("/", r)
+http.Handle("/", router)
 ```
 
 ### Architecture matrix
@@ -174,33 +177,21 @@ From a DDD perspective, you will find yourself writing two kinds of middlewares 
 
 ### Use cases
 
-- #### dynamic dependency injection
-
-```go
-func Stores(db *gorm.DB) Middleware {
-	return func(next Handler) Handler {
-		return HandlerFunc(func(res ResponseWriter, req *Request) {
-			ctx := context.WithValue(req.Context(), DbKey{}, db)
-
-			next.ServeHTTP(res, req.WithContext(ctx))
-		})
-	}
-}
-```
-
 - #### bind-like pattern
 
-With that in mind it's simple to bring route-object binding to your REST API, [somehow laravel does](https://laravel.com/docs/9.x/routing#implicit-binding):
+It's simple to bring route-object binding to your REST API, [somehow laravel does](https://laravel.com/docs/9.x/routing#implicit-binding).
+
+The database comes in through the closure, the same way `authz` does in `Auth`. Only the object loaded for this request goes into the context, because that's what the context is for: values that belong to a single request.
 
 ```go
-func Bind(table string) Middleware {
+func Bind(db *gorm.DB, table string) Middleware {
 	return func(next Handler) Handler {
 		return HandlerFunc(func(res ResponseWriter, req *Request) {
 			id := mux.Vars(req)["id"]
 
-            object := getObject(id)
+            object := getObject(db, table, id)
 
-            ctx = context.WithValue(req.Context(), BindKey{}, object)
+            ctx := context.WithValue(req.Context(), BindKey{}, object)
 
             next.ServeHTTP(res, req.WithContext(ctx))
 		})
@@ -211,12 +202,12 @@ func Bind(table string) Middleware {
 And also collections for lists endpoints:
 
 ```go
-func BindCollection(table string) Middleware {
+func BindCollection(db *gorm.DB, table string) Middleware {
 	return func(next Handler) Handler {
 		return HandlerFunc(func(res ResponseWriter, req *Request) {
             ctx := req.Context()
 
-            collection := getTable(table)
+            collection := getTable(db, table)
 
             ctx = context.WithValue(ctx, CollectionKey{}, collection)
 
@@ -233,7 +224,7 @@ func BindCollection(table string) Middleware {
 Define a function that can check errors in an incoming request is easy:
 
 ```go
-type Checker func(*Request) error
+type Check func(*Request) error
 ```
 
 So, implementing a middleware for validation is as easy as define a middleware that just iterates over a collecition of checks:
@@ -285,3 +276,7 @@ In order to avoid boilerplate code in every http backend project, I've created a
 - check type
 - validate middleware
 - condition middleware
+
+---
+
+*Updated in 2026: fixed the code samples, removed a broken link, and stopped passing the database through the request context.*
