@@ -1,10 +1,13 @@
 +++
 title = "Who owns the concurrency?"
+description = "The pipeline library I finally wrote starts from one idea: you implement the ends, and the library owns the middle."
 date = 2026-09-17
-draft = true
+
+[extra]
+image = "og/who-owns-the-concurrency.png"
 +++
 
-[On Monday](/posts/pipelines-six-years-later/) I took apart a pipeline I wrote in 2020 and found that its four unfinished TODO items (fan-out, cancellation, buffering, errors) were one problem wearing four hats. Most of them already had answers in [the Go blog article](https://go.dev/blog/pipelines) I had copied the shape from, and I had used none of them, because in that design each answer is hand-woven into every stage and re-woven whenever the pipeline changes. The stages owned the concurrency, so everything about the concurrency was their business.
+[On Monday](/posts/pipelines-six-years-later/) I took apart a pipeline I wrote in 2020 and found that its four unfinished TODO items (fan-out, cancellation, buffering, errors) were one problem wearing four hats: the stages owned the concurrency, so everything about the concurrency was their business.
 
 This is the other answer, the one I arrived at in [flow](https://github.com/pabloos/flow). It starts from a single idea: **you implement the ends, and the library owns the middle.** Everything below follows from that.
 
@@ -26,15 +29,11 @@ type Consumer[T any] interface {
 }
 ```
 
-Monday's post was stuck on `type pipe <-chan int`, because in 2020 there was no way to write "a stage takes an `I` and gives back an `O`". `Processor[I, O]` is that sentence, and it's the part generics actually bought. Not performance or elegance, just the ability to write the type down at all. Everything else here was available in 2020 and I didn't see it.
+Monday's post was stuck on `type pipe <-chan int`, because in 2020 there was no way to write "a stage takes an `I` and gives back an `O`". `Processor[I, O]` is that sentence, and it's the part generics actually bought. Not performance or elegance, just the ability to write the type down at all.
 
-Three decisions are packed into those three types, and it helps to pull them apart before looking at more code.
+The part that isn't about generics is `emit`. A stage doesn't return its output; it gets a function to call with it. Calling it once is a map, calling it zero times is a filter, calling it many times is a flatMap, so one shape covers all three and the runtime never has to ask which kind of stage it's holding. It also means a stage can't decide *where* its output goes. It can only say *here is a value*, and something else decides what that means.
 
-First, a stage doesn't return its output. It gets a function to call with it, and most of the design hangs on that `emit`. Calling it once is a map, calling it zero times is a filter, calling it many times is a flatMap, so one shape covers all three and the runtime never has to ask which kind of stage it's holding. It also means a stage can't decide *where* its output goes. It can only say *here is a value*, and something else decides what that means.
-
-Second, no channel appears in any of those signatures, and that's the part the 2020 design couldn't manage. Nothing there commits to values travelling through a channel, to how many copies of a stage run, or to whether outputs arrive in order. All of it is left open, which is what makes it possible to change those decisions later without touching a single stage.
-
-Third, they're interfaces with function adapters beside them. It's the `http.HandlerFunc` trick: a named function type with the method defined on it, so you can pass a closure where an interface is expected.
+Each interface has a function adapter beside it, the `http.HandlerFunc` trick: a named function type with the method defined on it, so you can pass a closure where an interface is expected.
 
 ```go
 type ProcessorFunc[I, O any] func(ctx context.Context, in I, emit func(O) error) error
@@ -46,11 +45,11 @@ func (f ProcessorFunc[I, O]) Process(ctx context.Context, in I, emit func(O) err
 
 Use an interface when a stage has state of its own, and a closure when it doesn't. That's what stops "implement the ends" from turning into ceremony for the common case.
 
-Three types, and none of them says anything about how the work runs. That isn't minimalism for its own sake. It's the price of the starting idea: anything else in those signatures would be the stage making a decision that belongs to the runtime.
+### No channels in the API
 
-### Composition stops needing a channel
+Read those three signatures again and notice what isn't there: a channel. Nothing commits to values travelling through one, to how many copies of a stage run, or to whether outputs arrive in order. That's the difference from 2020, where the channel *was* the type, and it's what leaves every one of those decisions open.
 
-Once a stage is a function that emits, composing two of them is composing two functions, and it needs no machinery at all:
+Composition stops needing a channel too. Two stages compose the way two functions compose:
 
 ```go
 func Then[A, B, C any](p1 Processor[A, B], p2 Processor[B, C]) Processor[A, C] {
@@ -62,9 +61,9 @@ func Then[A, B, C any](p1 Processor[A, B], p2 Processor[B, C]) Processor[A, C] {
 }
 ```
 
-The whole reversal is in those five lines: **the second stage becomes the `emit` that the first one is given.** When `p1` emits a value it isn't writing to a channel. It's calling `p2` directly, on the same goroutine, on the stack. A four-stage chain is four nested calls. Adding a fifth costs a function call rather than a goroutine and a channel handoff.
+The whole reversal is in those five lines: **the second stage becomes the `emit` that the first one is given.** When `p1` emits a value it isn't writing to a channel. It's calling `p2` directly, on the same goroutine, on the stack. A four-stage chain is four nested calls, and adding a fifth costs a function call rather than a goroutine and a channel handoff.
 
-In 2020, adding a stage added a unit of concurrency whether you wanted one or not. Here the two have come apart completely, so the concurrency can't stay implicit any more. It has to be set explicitly:
+In 2020, adding a stage added a unit of concurrency whether you wanted one or not. Here the two have come apart, so the concurrency can't stay implicit. It has to be stated:
 
 <svg viewBox="0 0 720 230" role="img" style="width:100%;height:auto;max-width:720px;display:block;margin:1.75rem auto" fill="none" stroke="currentColor" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12">
   <title>2026: one producer feeding a pool of workers, each running the whole composed chain, into a single collector</title>
@@ -115,86 +114,70 @@ err := flow.Run(ctx,
 )
 ```
 
-Eight workers, each running the entire composed chain end to end, all pulling from one input channel. The stage count is about what you're computing; the worker count is about how much machine you want to spend on it. On Monday, running a second copy of the slow stage meant writing a merge. Here it has a boring answer: you raise the number.
+The stage count is about what you're computing; the worker count is about how much machine you want to spend on it. Six hundred HTTP calls of 10 ms each take 6982 ms one at a time and 37 ms with `Workers(256)` on eight cores, and the server saw exactly as many concurrent requests as there were workers, every time. The right number isn't something you can read off `nproc`, either: the same pipeline doing CPU work tops out at 3.5× on those same cores, because parked goroutines are free and computing ones aren't.
 
 One detail in the diagram is easy to miss, and it's deliberate: the consumer sits behind a single collector goroutine. `Into(&out)` appends to a slice with no mutex, and that's safe by construction rather than by luck.
 
-### Under load, where the old example never went
+### Ordering and cancellation
 
-None of this is worth much as an assertion. And the reason the 2020 post never caught its own problem is sitting in its last code listing: it ran `Exec(1, 2, 3, 4, 5)` over three arithmetic stages. Five integers, no failures, no skew and no reason to care about order. Nothing in that example could push back.
+These two are worth pulling out, because they are what those open signatures buy. Neither is a feature bolted on top; both are decisions the runtime gets to make precisely because no stage ever claimed them.
 
-So here's a harder one, with the kind of stage a backend actually has. Most pipelines there aren't computing, they're waiting on a query, another service or a disk. The expensive stage below is an HTTP call to a local server that takes 10 ms to answer each request:
+Ordering is opt-in. Every input gets a sequence number on its way in, and with `Ordered()` the collector holds finished results back until the missing one arrives, so the consumer sees input order even though the pool didn't produce it:
 
-```go
-fetch := flow.ProcessorFunc[string, profile](
-    func(ctx context.Context, url string, emit func(profile) error) error {
-        req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
-        if err != nil {
-            return err
-        }
-        resp, err := client.Do(req)
-        if err != nil {
-            return err
-        }
-        defer resp.Body.Close()
+<svg viewBox="0 0 720 240" role="img" style="width:100%;height:auto;max-width:720px;display:block;margin:1.75rem auto" fill="none" stroke="currentColor" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12">
+  <title>While the first request is still running, ordered delivery holds every finished result in a map</title>
+  <text x="0" y="12" stroke="none" fill="currentColor" font-size="11" opacity="0.7">while request #1 is still out (1.5 s), these four have already finished</text>
+  <g stroke-width="1.2">
+    <rect x="1" y="92" width="118" height="40" rx="2"/>
+  </g>
+  <g stroke="none" fill="currentColor" text-anchor="middle">
+    <text x="60" y="110">#1</text>
+    <text x="60" y="126" font-size="10" opacity="0.75">still running</text>
+  </g>
+  <text x="150" y="36" stroke="none" fill="currentColor" font-size="11" opacity="0.75">without Ordered()</text>
+  <g stroke-width="1.2">
+    <rect x="150" y="44" width="50" height="28" rx="2"/>
+    <rect x="210" y="44" width="50" height="28" rx="2"/>
+    <rect x="270" y="44" width="50" height="28" rx="2"/>
+    <rect x="330" y="44" width="50" height="28" rx="2"/>
+    <path d="M388 58 H548"/><path d="M542 54 l6 4 -6 4"/>
+    <rect x="556" y="44" width="120" height="28" rx="2"/>
+  </g>
+  <g stroke="none" fill="currentColor" text-anchor="middle">
+    <text x="175" y="63">#2</text><text x="235" y="63">#3</text><text x="295" y="63">#4</text><text x="355" y="63">#5</text>
+    <text x="616" y="63">Consumer</text>
+  </g>
+  <text x="150" y="88" stroke="none" fill="currentColor" font-size="10" opacity="0.75">delivered as they finish · peak heap 7.1 MB</text>
+  <text x="150" y="138" stroke="none" fill="currentColor" font-size="11" opacity="0.75">with Ordered()</text>
+  <g stroke-width="1.2">
+    <rect x="142" y="146" width="246" height="44" rx="2" stroke-dasharray="4 3"/>
+    <rect x="150" y="152" width="50" height="28" rx="2"/>
+    <rect x="210" y="152" width="50" height="28" rx="2"/>
+    <rect x="270" y="152" width="50" height="28" rx="2"/>
+    <rect x="330" y="152" width="50" height="28" rx="2"/>
+    <path d="M396 166 H462"/><path d="M456 162 l6 4 -6 4"/>
+    <path d="M472 148 V184"/>
+    <rect x="556" y="152" width="120" height="28" rx="2" opacity="0.45"/>
+  </g>
+  <g stroke="none" fill="currentColor" text-anchor="middle">
+    <text x="175" y="171">#2</text><text x="235" y="171">#3</text><text x="295" y="171">#4</text><text x="355" y="171">#5</text>
+    <text x="616" y="171" opacity="0.45">Consumer</text>
+  </g>
+  <text x="484" y="171" stroke="none" fill="currentColor" font-size="10" opacity="0.75">waits for #1</text>
+  <text x="150" y="206" stroke="none" fill="currentColor" font-size="10" opacity="0.75">held in a map until #1 arrives · peak heap 25.0 MB</text>
+  <text x="0" y="232" stroke="none" fill="currentColor" font-size="11" opacity="0.7">the map holds outputs, not inputs: ordering costs whatever your results weigh</text>
+</svg>
 
-        var p profile
-        if err := json.NewDecoder(resp.Body).Decode(&p); err != nil {
-            return err
-        }
-        return emit(p)
-    })
-```
+That's why it's opt-in: it costs memory rather than time. In a run where the first of 3,000 requests took 1.5 seconds and each result was a 4 KB profile, `Ordered()` left the wall time untouched and took the peak heap from 7.1 MB to 25 MB. It only charges for what leaves the pipeline, which is a good reason to shrink results before the end rather than after.
 
-600 requests, so six seconds if you make them one at a time. Eight cores, median of five runs:
+Cancellation falls out of the same place. Every send inside the runtime sits in a `select` against `ctx.Done()`, and the first end to fail wins: a `sync.Once` keeps its error and cancels everything else. A 500 on request 1,500 of 3,000 came back from `Run` intact, with half the batch never sent; a 100 ms deadline stopped the run at 102 ms. In both cases the requests already on the wire were aborted rather than left to finish, and that part isn't `flow` at all: it's the same `ctx`, handed to `NewRequestWithContext` by a stage that knows nothing about any of this.
 
-| | wall time | speedup | concurrent requests seen by the server |
-|---|---:|---:|---:|
-| `Workers(1)` | 6982 ms | — | 1 |
-| `Workers(8)` | 846 ms | 8.3× | 8 |
-| `Workers(32)` | 217 ms | 32.1× | 32 |
-| `Workers(64)` | 113 ms | 61.8× | 64 |
-| `Workers(128)` | 58 ms | 119.6× | 128 |
-| `Workers(256)` | 37 ms | 187.8× | 256 |
+The 2020 design could do neither. There was no `ctx` to thread and no single place to hold a result back, because both would have meant editing every stage by hand, and then editing them again the next time.
 
-Near-linear to 256 workers on eight cores, and the last column is the one I care about most: the concurrency the *server* observed tracked `Workers(n)` exactly, every time. The knob does what it says.
+### What changed
 
-What it doesn't do is tell you the right number, and that number has nothing to do with your hardware. The same pipeline doing CPU work instead (hashing in a loop) tops out at 3.5× on these eight cores, and workers past eight buy nothing, because parked goroutines are free and computing ones aren't. For CPU work you could read the right setting off `nproc`. Here it's however many requests you're willing to have in flight, and that ceiling belongs to the service you're calling, not to you.
+Six years, and what changed was a single question. Not *how do I arrange the stages*, which is what the old post spent its length on and answered reasonably well, but **who owns the concurrency?**
 
-That's the practical case for letting the runtime own the concurrency. Nothing in those `Processor`s knows whether it's hashing or waiting on a socket, and nothing had to be rewritten to go from 3.5× to 188×.
+Once the answer stopped being "each stage, permanently, decided the moment you write it", the four items on that TODO list stopped being rewrites and became arguments you pass.
 
-(The caveat, since this is a synthetic backend: my test server has no connection limit and no saturation point, so it scales as far as I push it. A real one answers 256 concurrent requests by getting slower, or by rate-limiting you. The knob has a right value out there; it just isn't one you can read off a spec sheet.)
-
-### What it costs, and how it stops
-
-Ordering costs memory, not time, and only for what leaves the pipeline. To make order expensive, the first of 3,000 requests takes 1.5 seconds while the rest take 10 ms, and each response is a 4 KB profile. Sixty-four workers, heap sampled while it runs:
-
-| | wall time | peak heap |
-|---|---:|---:|
-| `Workers(64)` | 1501 ms | 7.1 MB |
-| `Workers(64)` + `Ordered()` | 1502 ms | 25.0 MB |
-
-Same wall time, three and a half times the peak heap. The collector can't deliver the second result until the first has arrived, so everything that finishes while the slow request is still out piles up in a map: here, nearly 3,000 profiles. Ordering is a buffer, and the buffer grows to fit the worst item in the batch.
-
-It took me a second run to see why that matters. My first attempt added a last stage that reduced each profile to a short `"user:score"` label, and the difference vanished (7.4 MB against 7.6). The collector only ever holds *outputs*. What ordering costs is decided by what comes out of the pipeline, not by what went through it, which is a good reason to shrink results before the end rather than after.
-
-A failure stops the batch. Here the server returns a 500 for request 1,500 of 3,000:
-
-```
-err = GET http://127.0.0.1:50417/profile?id=1500: 500 Internal Server Error
-consumed = 1506 · requests aborted in flight = 12 · 276 ms
-```
-
-The error comes back from `Run` intact, roughly half the batch was never sent at all, and the twelve requests already on the wire were aborted rather than left to finish. That last part isn't something `flow` does. It's the `ctx` passed into `NewRequestWithContext`, cancelled by the runtime as soon as the first error landed.
-
-A deadline stops it too. A 100 ms timeout on the same 3,000 requests stopped the run at 102 ms, with 512 consumed, 60 requests aborted in flight, and `context.DeadlineExceeded` back from `Run`.
-
-That last result has only been true since this week. Until I ran this, `Run` returned `nil` on a cancelled context, so a truncated run looked exactly like a finished one. The toy example could never have shown it, because a toy example is never still running when somebody cancels.
-
-### The list, finally
-
-Every item on it turned into a consequence rather than a feature. Errors come back because each end returns one, and a `sync.Once` keeps the first and cancels the rest. Cancellation works because every send in the runtime sits in a `select` against `ctx.Done()`. The 2020 version had no way to stop at all, and leaked the goroutines of anyone still blocked on a send. Buffering is `Prefetch(n)`, defaulting to zero, which is the same lock-step the old unbuffered channels gave you. The behaviour didn't change, only the fact that it's now a named knob rather than a `make(chan int)` repeated in four places.
-
-And ordering, which was never on the list, turned out to be the one with a real price tag and gets its own post next week.
-
-Six years, and what changed was a single question. Not *how do I arrange the stages*, which is what the old post spent its length on and answered reasonably well, but **who owns the concurrency?** Once the answer stopped being "each stage, permanently, decided at the moment you write it", four things that had been rewrites became four arguments you pass.
+The library is at [github.com/pabloos/flow](https://github.com/pabloos/flow), a handful of files with no dependencies beyond the standard library. If you put it to work on a pipeline of your own, I'd like to hear where it gets in the way.
